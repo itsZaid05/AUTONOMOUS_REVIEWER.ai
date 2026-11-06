@@ -1,0 +1,38 @@
+name: paperflow-dev
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: paperflow
+      POSTGRES_USER: paperflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?local password required}
+    ports: ['127.0.0.1:5432:5432']
+    volumes: ['postgres-data:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U paperflow -d paperflow']
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7.4
+    command: ['redis-server', '--appendonly', 'yes']
+    ports: ['127.0.0.1:6379:6379']
+    volumes: ['redis-data:/data']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      retries: 20
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ['127.0.0.1:1025:1025', '127.0.0.1:8025:8025']
+  n8n:
+    image: n8nio/n8n:1.123.0
+    ports: ['127.0.0.1:5678:5678']
+    environment:
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_VERSION_NOTIFICATIONS_ENABLED: 'false'
+    volumes: ['n8n-data:/home/node/.n8n']
+volumes:
+  postgres-data:
+  redis-data:
+  n8n-data:

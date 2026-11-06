@@ -1,0 +1,4 @@
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended latexmk chktex && rm -rf /var/lib/apt/lists/*
+ENV openin_any=p openout_any=p
+WORKDIR /work

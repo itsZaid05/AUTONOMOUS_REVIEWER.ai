@@ -1,0 +1,47 @@
+{
+  "run": "244b4564",
+  "mixed_format": {
+    "submitted": 10,
+    "completed": 10,
+    "failed": 0,
+    "seconds": 5.96,
+    "errors": []
+  },
+  "cycle": {
+    "revised": 10,
+    "emails_sent": 10,
+    "approved": 10,
+    "publication": {
+      "publication_id": "22d4f082fcfd476c8ea2bbf7ae3b53fd",
+      "files": [
+        "01f44416b83d4983a7bc700418f5fc32.pdf",
+        "1d61980193664c76b17657c45792c3c2.pdf",
+        "49c93aaf5171459e8c3a28c36059f1a0.pdf",
+        "5726d59596074eb6967dc936a20ff6e0.pdf",
+        "5e32976576dc4662a0aa6cf58f97fee7.pdf",
+        "6873cbf8fbf24372bf434181abdd494a.pdf",
+        "775d96f247a94898be4e1d81d60d28e1.pdf",
+        "a12ab446cc7948d7b7df2dab573fbcb2.pdf",
+        "audit.json",
+        "bb23f52aba7a472580c17e3092ddaf0c.pdf",
+        "book-of-abstracts.docx",
+        "book-of-abstracts.html",
+        "book-of-abstracts.pdf",
+        "camera-ready-sources.zip",
+        "d1500d0d87844bd6a2b7e4a79b92e845.pdf",
+        "metadata.csv",
+        "proceedings.pdf"
+      ]
+    },
+    "seconds": 22.01
+  },
+  "bulk": {
+    "attempted": 100,
+    "accepted": 100,
+    "rejected": 0,
+    "completed": 100,
+    "failed": 0,
+    "seconds": 1.57,
+    "worker_concurrency": 2
+  }
+}

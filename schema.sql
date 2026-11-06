@@ -1,0 +1,75 @@
+
+CREATE TABLE audit (
+	id SERIAL NOT NULL,
+	paper_id VARCHAR NOT NULL,
+	action VARCHAR NOT NULL,
+	details JSON NOT NULL,
+	created TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (id)
+)
+
+;
+
+
+CREATE TABLE events (
+	id VARCHAR NOT NULL,
+	state VARCHAR NOT NULL,
+	result JSON NOT NULL,
+	PRIMARY KEY (id)
+)
+
+;
+
+
+CREATE TABLE papers (
+	id VARCHAR NOT NULL,
+	title TEXT NOT NULL,
+	authors TEXT NOT NULL,
+	affiliation TEXT NOT NULL,
+	email VARCHAR NOT NULL,
+	track VARCHAR NOT NULL,
+	profile VARCHAR NOT NULL,
+	status VARCHAR NOT NULL,
+	latest INTEGER NOT NULL,
+	approved_version INTEGER,
+	created TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (id)
+)
+
+;
+
+
+CREATE TABLE messages (
+	id VARCHAR NOT NULL,
+	paper_id VARCHAR NOT NULL,
+	version INTEGER NOT NULL,
+	state VARCHAR NOT NULL,
+	subject TEXT NOT NULL,
+	body TEXT NOT NULL,
+	approved BOOLEAN NOT NULL,
+	sent TIMESTAMP WITH TIME ZONE,
+	error TEXT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY(paper_id) REFERENCES papers (id)
+)
+
+;
+
+
+CREATE TABLE versions (
+	id VARCHAR NOT NULL,
+	paper_id VARCHAR NOT NULL,
+	number INTEGER NOT NULL,
+	filename VARCHAR NOT NULL,
+	digest VARCHAR NOT NULL,
+	path TEXT NOT NULL,
+	result JSON NOT NULL,
+	error TEXT NOT NULL,
+	state VARCHAR NOT NULL,
+	created TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (paper_id, number),
+	FOREIGN KEY(paper_id) REFERENCES papers (id)
+)
+
+;

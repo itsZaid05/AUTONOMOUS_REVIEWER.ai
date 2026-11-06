@@ -1,0 +1,64 @@
+{
+  "id": "paperflowpublication",
+  "name": "PaperFlow \u00b7 Publication Assembly",
+  "active": false,
+  "nodes": [
+    {
+      "id": "e9420a5f-2f5c-4427-8b98-7c405f963be1",
+      "name": "Receive event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paperflow-publication",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "203be893-0288-400e-aefb-30ef50e6756a",
+      "name": "Perform approved operation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/publication\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "position": [
+        320,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Receive event": {
+      "main": [
+        [
+          {
+            "node": "Perform approved operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [],
+  "versionId": "2c4e99ba-f758-4bc2-8e64-8cf5cc23cf65"
+}
