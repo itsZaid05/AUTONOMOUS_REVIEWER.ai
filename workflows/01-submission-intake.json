@@ -1,0 +1,64 @@
+{
+  "id": "paperflowintake",
+  "name": "PaperFlow \u00b7 Submission Intake",
+  "active": false,
+  "nodes": [
+    {
+      "id": "e629ffb3-64b7-40b7-b923-90e0f05d371a",
+      "name": "Receive event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paperflow-intake",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "f8478b1e-89bc-472e-9afe-95d4f23f5dee",
+      "name": "Perform approved operation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/intake\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "position": [
+        320,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Receive event": {
+      "main": [
+        [
+          {
+            "node": "Perform approved operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [],
+  "versionId": "b2c96c58-3e46-42a9-a787-0725ec96f4b2"
+}

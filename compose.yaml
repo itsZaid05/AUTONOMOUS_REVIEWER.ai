@@ -1,0 +1,64 @@
+name: paperflow
+x-app: &app
+  build: .
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql+psycopg://paperflow:${POSTGRES_PASSWORD:?required}@postgres:5432/paperflow
+    REDIS_URL: redis://redis:6379/0
+    SMTP_HOST: mailpit
+  volumes:
+    - ./data:/workspace/AUTONOMOUS_REVIEWER.ai/data
+  depends_on:
+    postgres: {condition: service_healthy}
+    redis: {condition: service_healthy}
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: paperflow
+      POSTGRES_USER: paperflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U paperflow -d paperflow']
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7.4
+    volumes: ['redisdata:/data']
+    command: ['redis-server','--appendonly','yes']
+    healthcheck:
+      test: ['CMD','redis-cli','ping']
+      interval: 5s
+      retries: 20
+  api:
+    <<: *app
+    ports: ['127.0.0.1:8000:8000']
+  worker:
+    <<: *app
+    command: ['celery','-A','app.jobs.queue','worker','--concurrency=2','--loglevel=INFO']
+    volumes:
+      - ./data:/workspace/AUTONOMOUS_REVIEWER.ai/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
+  dashboard:
+    <<: *app
+    command: ['streamlit','run','app/dashboard.py','--server.address=0.0.0.0','--browser.gatherUsageStats=false']
+    environment:
+      API_URL: http://api:8000
+    ports: ['127.0.0.1:8501:8501']
+  n8n:
+    image: n8nio/n8n:1.123.0
+    environment:
+      PAPERFLOW_API_URL: http://api:8000
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+    volumes: ['n8ndata:/home/node/.n8n']
+    ports: ['127.0.0.1:5678:5678']
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ['127.0.0.1:8025:8025']
+volumes:
+  pgdata:
+  redisdata:
+  n8ndata:

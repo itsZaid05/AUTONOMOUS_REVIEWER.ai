@@ -1,0 +1,64 @@
+{
+  "id": "paperflowcomplete",
+  "name": "PaperFlow \u00b7 Validation Completion",
+  "active": false,
+  "nodes": [
+    {
+      "id": "040e9cfc-8aa1-489d-8d0c-794380e392ce",
+      "name": "Receive event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paperflow-complete",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "025d6ee2-e8c8-4d26-b836-7249054827d7",
+      "name": "Perform approved operation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/complete\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "position": [
+        320,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Receive event": {
+      "main": [
+        [
+          {
+            "node": "Perform approved operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [],
+  "versionId": "5609eb50-69d2-42db-8b98-24a08a6169f2"
+}

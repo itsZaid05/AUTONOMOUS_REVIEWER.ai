@@ -1,0 +1,11 @@
+# Executed validation
+
+- Python dependency consistency: `pip check` passed.
+- PostgreSQL integration suite: 5 tests passed, covering authentication, upload persistence, duplicate/format rejection, ZIP traversal rejection, real DOCX parsing, detected writing findings, report generation, approval gating, publication exports, secure revisions, approval invalidation, and durable automation deduplication.
+- Actual API + Celery run: 10 mixed-format manuscripts completed validation (4 DOCX, 3 PDF, 3 LaTeX ZIP); intentional repeated-word findings detected. Ten PDF reports downloaded, ten approved emails received by local Mailpit, ten corrected revisions revalidated, then approved and included in downloaded abstract-book and proceedings exports. Total complete-cycle time: 22.01 seconds. See DEMO_RESULTS.json.
+- Bulk: 100 small synthetic PDFs accepted, 100 completed, 0 rejected, 0 failed, 1.57 seconds with two Celery workers. This does not measure large or complex source projects.
+- n8n 1.123.0: all five application exports and the three-event fixture imported in a disposable instance. Initial import failed due to missing versionId, corrected before successful retry. n8n emitted new-workflow webhook-removal warnings but then confirmed successful imports. Manual fixture actually produced accepted, duplicate and rejected results with successful node execution. Production credential-bound webhook and scheduled execution remain unverified.
+- Docker: restricted TeX image and full application image built successfully with certificate/signature verification retained. Full Compose stack started on alternate loopback ports. Container API/worker smoke checks cover persistent DOCX upload, actual rendering, and correction PDF response; Streamlit health checked separately.
+- OpenAI/Gemini, Crossref and optional LanguageTool service were not invoked. No provider credentials were supplied. These checks are reported skipped by default.
+
+The app is a development implementation. Publisher-specific rules must be configured from official requirements; complex typography/semantics require human review. SMTP is orchestrated through the API, not a native n8n SMTP node; reminders produce an editorial escalation queue. See README for production hardening and other coverage limits.

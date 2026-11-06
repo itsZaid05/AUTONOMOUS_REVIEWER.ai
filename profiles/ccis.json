@@ -1,0 +1,7 @@
+{
+  "name": "Springer CCIS",
+  "version": "1",
+  "source": "https://www.springer.com/gp/computer-science/lncs/conference-proceedings-guidelines",
+  "requirements": {},
+  "note": "Conference-specific official requirements must be supplied by an editor."
+}

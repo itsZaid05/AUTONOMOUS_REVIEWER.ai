@@ -1,0 +1,128 @@
+{
+  "id": "paperflowreminders",
+  "name": "PaperFlow \u00b7 Reminders & Escalation",
+  "active": false,
+  "nodes": [
+    {
+      "id": "d284654c-1c0d-4ed6-b3f9-9f6b5d2d33c4",
+      "name": "Receive event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paperflow-reminders",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "2607763a-d2b3-48fe-a70a-c7740c2a3b40",
+      "name": "Perform approved operation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/reminders\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "position": [
+        320,
+        0
+      ]
+    },
+    {
+      "id": "812ccf53-4f41-4d01-91cf-96f3a215b6fd",
+      "name": "Daily review",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "5faeae57-f43a-4023-bb80-d91345ca2784",
+      "name": "Make scheduled event",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5cea1803-9184-44b6-97a7-f3ccaefe6d5f",
+              "name": "body",
+              "value": "={{ {event_id: \"reminders-\" + $now.toFormat(\"yyyy-MM-dd\")} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        160,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Receive event": {
+      "main": [
+        [
+          {
+            "node": "Perform approved operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily review": {
+      "main": [
+        [
+          {
+            "node": "Make scheduled event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make scheduled event": {
+      "main": [
+        [
+          {
+            "node": "Perform approved operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [],
+  "versionId": "029c05f8-a698-4bc4-8f72-75d21c4a4367"
+}

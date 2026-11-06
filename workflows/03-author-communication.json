@@ -1,0 +1,64 @@
+{
+  "id": "paperflowcommunicate",
+  "name": "PaperFlow \u00b7 Author Communication",
+  "active": false,
+  "nodes": [
+    {
+      "id": "36032f7b-ea86-44c3-a4a7-d46aced84b65",
+      "name": "Receive event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paperflow-communicate",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "c1f8a5ee-c03e-4ee0-9f55-03d3acae6c5f",
+      "name": "Perform approved operation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/communicate\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "position": [
+        320,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Receive event": {
+      "main": [
+        [
+          {
+            "node": "Perform approved operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [],
+  "versionId": "7db88837-c1f9-4f11-94fb-3e74b31e6a46"
+}
