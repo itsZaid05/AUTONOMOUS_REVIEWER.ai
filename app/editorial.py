@@ -10,6 +10,7 @@ from .settings import settings
 from .db import Session,Paper,Version,Audit,Message,now
 from .main import app,admin,record,register
 from .reports import report
+from .mail import send_smtp
 serializer=URLSafeTimedSerializer(settings.signing_key,salt='paperflow-revision')
 class Approval(BaseModel):
     acknowledge_review:bool=False
@@ -145,7 +146,7 @@ def send_message(mid:str):
         mail.add_attachment(pdf.read_bytes(),maintype='application',subtype='pdf',filename='correction-report.pdf')
         m.state='Sending';s.commit()
         try:
-            with smtplib.SMTP(settings.smtp_host,settings.smtp_port,timeout=20) as smtp:smtp.send_message(mail)
+            send_smtp(mail)
             m.state='Sent';m.sent=now();record(s,p.id,'email_sent',{'message_id':mid});s.commit()
         except Exception as e:
             m.state='Delivery uncertain';m.error=type(e).__name__;s.commit();raise HTTPException(502,'Delivery uncertain; inspect SMTP before retrying to avoid duplicates')

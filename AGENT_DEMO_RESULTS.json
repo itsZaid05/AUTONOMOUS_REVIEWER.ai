@@ -1,0 +1,399 @@
+{
+  "run": "agent-160ced58",
+  "seconds": 154.47,
+  "papers": [
+    {
+      "next_reminder": null,
+      "external_id": "paper-1",
+      "paper_id": "1724413743ec4c009b44b368a28df446",
+      "title": "Controlled Proceedings Study 1",
+      "state": "Publication Ready",
+      "version": 1,
+      "validation": "Complete",
+      "version_id": "a3cc56b08d0149e5a09d718fd0933659",
+      "issues": [
+        {
+          "paper_id": "1724413743ec4c009b44b368a28df446",
+          "category": "inspection",
+          "severity": "review",
+          "location": "document",
+          "observed_problem": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "expected_requirement": "Editorial review required",
+          "evidence": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "suggested_correction": "",
+          "confidence": 1,
+          "fingerprint": "5c70abd5493a15f9"
+        }
+      ],
+      "comparison": {
+        "resolved": [],
+        "new": [
+          "5c70abd5493a15f9"
+        ],
+        "remaining": []
+      },
+      "deadline": null,
+      "details": {
+        "metadata_conflicts": {},
+        "source_manifest": "paper-1/submission.json"
+      },
+      "messages": []
+    },
+    {
+      "next_reminder": null,
+      "external_id": "paper-2",
+      "paper_id": "56b4650957c4462ab0371c1977341b02",
+      "title": "Controlled Proceedings Study 2",
+      "state": "Publication Ready",
+      "version": 2,
+      "validation": "Complete",
+      "version_id": "241e01b11bd54c519504e69596a163d8",
+      "issues": [
+        {
+          "paper_id": "56b4650957c4462ab0371c1977341b02",
+          "category": "inspection",
+          "severity": "review",
+          "location": "document",
+          "observed_problem": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "expected_requirement": "Editorial review required",
+          "evidence": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "suggested_correction": "",
+          "confidence": 1,
+          "fingerprint": "5c70abd5493a15f9"
+        }
+      ],
+      "comparison": {
+        "resolved": [
+          "5b056cb9f4b6c6a8",
+          "e21bf9dccff693be"
+        ],
+        "new": [],
+        "remaining": [
+          "5c70abd5493a15f9"
+        ]
+      },
+      "deadline": null,
+      "details": {
+        "metadata_conflicts": {},
+        "source_manifest": "paper-2-revision/submission.json"
+      },
+      "messages": [
+        {
+          "id": "agent-160ced58:56b4650957c4462ab0371c1977341b02:1:correction",
+          "kind": "correction",
+          "state": "Sent",
+          "recipient": "author2@example.test",
+          "created": "2026-11-06T20:05:40.308806+00:00",
+          "sent": "2026-11-06T20:05:44.369903+00:00",
+          "error": ""
+        }
+      ]
+    },
+    {
+      "next_reminder": null,
+      "external_id": "paper-3",
+      "paper_id": "0d4c16ac40384794b606653c81d7f4f3",
+      "title": "Controlled Proceedings Study 3",
+      "state": "Publication Ready",
+      "version": 2,
+      "validation": "Complete",
+      "version_id": "b82dd7eb10504dbc86ea5ee721488427",
+      "issues": [
+        {
+          "paper_id": "0d4c16ac40384794b606653c81d7f4f3",
+          "category": "inspection",
+          "severity": "review",
+          "location": "document",
+          "observed_problem": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "expected_requirement": "Editorial review required",
+          "evidence": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "suggested_correction": "",
+          "confidence": 1,
+          "fingerprint": "5c70abd5493a15f9"
+        }
+      ],
+      "comparison": {
+        "resolved": [
+          "506345ede6f0d186",
+          "de9549388a905369",
+          "e22e215e896326b8",
+          "e997061cbb3024fe"
+        ],
+        "new": [
+          "5c70abd5493a15f9"
+        ],
+        "remaining": []
+      },
+      "deadline": null,
+      "details": {
+        "metadata_conflicts": {},
+        "source_manifest": "paper-3-revision/submission.json"
+      },
+      "messages": [
+        {
+          "id": "agent-160ced58:0d4c16ac40384794b606653c81d7f4f3:1:correction",
+          "kind": "correction",
+          "state": "Sent",
+          "recipient": "author3@example.test",
+          "created": "2026-11-06T20:05:44.021148+00:00",
+          "sent": "2026-11-06T20:05:44.383055+00:00",
+          "error": ""
+        }
+      ]
+    },
+    {
+      "next_reminder": null,
+      "external_id": "paper-4",
+      "paper_id": "fce0db73efa3437ea54d192092f004ba",
+      "title": "Controlled Proceedings Study 4",
+      "state": "Publication Ready",
+      "version": 2,
+      "validation": "Complete",
+      "version_id": "dc208085eee44fa6bfd0da08ca929c27",
+      "issues": [
+        {
+          "paper_id": "fce0db73efa3437ea54d192092f004ba",
+          "category": "inspection",
+          "severity": "review",
+          "location": "document",
+          "observed_problem": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "expected_requirement": "Editorial review required",
+          "evidence": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "suggested_correction": "",
+          "confidence": 1,
+          "fingerprint": "5c70abd5493a15f9"
+        }
+      ],
+      "comparison": {
+        "resolved": [
+          "50de8cdc31b839b0",
+          "b8007560491ad01d"
+        ],
+        "new": [],
+        "remaining": [
+          "5c70abd5493a15f9"
+        ]
+      },
+      "deadline": null,
+      "details": {
+        "metadata_conflicts": {},
+        "source_manifest": "paper-4-revision/submission.json"
+      },
+      "messages": [
+        {
+          "id": "agent-160ced58:fce0db73efa3437ea54d192092f004ba:1:correction",
+          "kind": "correction",
+          "state": "Sent",
+          "recipient": "author4@example.test",
+          "created": "2026-11-06T20:05:44.241281+00:00",
+          "sent": "2026-11-06T20:05:44.394629+00:00",
+          "error": ""
+        }
+      ]
+    },
+    {
+      "next_reminder": null,
+      "external_id": "paper-5",
+      "paper_id": "b39e36759f364f8ab63b3183d846ffc2",
+      "title": "Controlled Proceedings Study 5",
+      "state": "Publication Ready",
+      "version": 2,
+      "validation": "Complete",
+      "version_id": "234b3c8da5b94c8d8fd903d3ebff6b4b",
+      "issues": [
+        {
+          "paper_id": "b39e36759f364f8ab63b3183d846ffc2",
+          "category": "inspection",
+          "severity": "review",
+          "location": "document",
+          "observed_problem": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "expected_requirement": "Editorial review required",
+          "evidence": "Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.",
+          "suggested_correction": "",
+          "confidence": 1,
+          "fingerprint": "5c70abd5493a15f9"
+        }
+      ],
+      "comparison": {
+        "resolved": [
+          "7b9c9e222765b4a9"
+        ],
+        "new": [],
+        "remaining": [
+          "5c70abd5493a15f9"
+        ]
+      },
+      "deadline": null,
+      "details": {
+        "metadata_conflicts": {},
+        "source_manifest": "paper-5/submission.json"
+      },
+      "messages": [
+        {
+          "id": "agent-160ced58:b39e36759f364f8ab63b3183d846ffc2:1:correction",
+          "kind": "correction",
+          "state": "Sent",
+          "recipient": "author5@example.test",
+          "created": "2026-11-06T20:05:44.348462+00:00",
+          "sent": "2026-11-06T20:05:48.407607+00:00",
+          "error": ""
+        },
+        {
+          "id": "agent-160ced58:b39e36759f364f8ab63b3183d846ffc2:1:reminder-120",
+          "kind": "reminder-120",
+          "state": "Sent",
+          "recipient": "author5@example.test",
+          "created": "2026-11-06T20:07:50.056798+00:00",
+          "sent": "2026-11-06T20:07:50.067253+00:00",
+          "error": ""
+        }
+      ]
+    }
+  ],
+  "publication": {
+    "publication_id": "b82abadc2f694f75ae771e8f74709c72",
+    "files": [
+      "0d4c16ac40384794b606653c81d7f4f3.pdf",
+      "1724413743ec4c009b44b368a28df446.pdf",
+      "56b4650957c4462ab0371c1977341b02.pdf",
+      "audit.json",
+      "b39e36759f364f8ab63b3183d846ffc2.pdf",
+      "book-of-abstracts.docx",
+      "book-of-abstracts.html",
+      "book-of-abstracts.pdf",
+      "camera-ready-sources.zip",
+      "fce0db73efa3437ea54d192092f004ba.pdf",
+      "metadata.csv",
+      "proceedings.pdf",
+      "publication-package.zip"
+    ]
+  },
+  "sent_messages": [
+    {
+      "id": "agent-160ced58:56b4650957c4462ab0371c1977341b02:1:correction",
+      "paper_id": "56b4650957c4462ab0371c1977341b02",
+      "version": 1,
+      "kind": "correction",
+      "recipient": "author2@example.test",
+      "state": "Sent",
+      "created": "2026-11-06T20:05:40.308806+00:00",
+      "sent": "2026-11-06T20:05:44.369903+00:00",
+      "smtp_message_id": "<a32b18edb441f40193a583d6fca16fac8ee0f79d77a67dfe5d8107d7cff9f1d8@paperflow.local>"
+    },
+    {
+      "id": "agent-160ced58:0d4c16ac40384794b606653c81d7f4f3:1:correction",
+      "paper_id": "0d4c16ac40384794b606653c81d7f4f3",
+      "version": 1,
+      "kind": "correction",
+      "recipient": "author3@example.test",
+      "state": "Sent",
+      "created": "2026-11-06T20:05:44.021148+00:00",
+      "sent": "2026-11-06T20:05:44.383055+00:00",
+      "smtp_message_id": "<7985ca8f753999ffc9f1efbb92e3f1803c90b1c3de0267ebd2960d5c5d100c7c@paperflow.local>"
+    },
+    {
+      "id": "agent-160ced58:fce0db73efa3437ea54d192092f004ba:1:correction",
+      "paper_id": "fce0db73efa3437ea54d192092f004ba",
+      "version": 1,
+      "kind": "correction",
+      "recipient": "author4@example.test",
+      "state": "Sent",
+      "created": "2026-11-06T20:05:44.241281+00:00",
+      "sent": "2026-11-06T20:05:44.394629+00:00",
+      "smtp_message_id": "<24d1c6f4bd131869d225e428a928dce3a4a64791a10d1f35f87e8c84b54d6a30@paperflow.local>"
+    },
+    {
+      "id": "agent-160ced58:b39e36759f364f8ab63b3183d846ffc2:1:correction",
+      "paper_id": "b39e36759f364f8ab63b3183d846ffc2",
+      "version": 1,
+      "kind": "correction",
+      "recipient": "author5@example.test",
+      "state": "Sent",
+      "created": "2026-11-06T20:05:44.348462+00:00",
+      "sent": "2026-11-06T20:05:48.407607+00:00",
+      "smtp_message_id": "<b1eb948747d16929fa4f889c2cafce808f32ccc0113859ac17ab234707bb834f@paperflow.local>"
+    },
+    {
+      "id": "agent-160ced58:b39e36759f364f8ab63b3183d846ffc2:1:reminder-120",
+      "paper_id": "b39e36759f364f8ab63b3183d846ffc2",
+      "version": 1,
+      "kind": "reminder-120",
+      "recipient": "author5@example.test",
+      "state": "Sent",
+      "created": "2026-11-06T20:07:50.056798+00:00",
+      "sent": "2026-11-06T20:07:50.067253+00:00",
+      "smtp_message_id": "<cd2f0d509332d2870844736c08764dbc5c1f4aecc684cd64d171cd3268af44b9@paperflow.local>"
+    },
+    {
+      "id": "agent-160ced58:coordinator:0:publication",
+      "paper_id": "",
+      "version": 0,
+      "kind": "publication",
+      "recipient": "coordinator@example.test",
+      "state": "Sent",
+      "created": "2026-11-06T20:08:05.617009+00:00",
+      "sent": "2026-11-06T20:08:05.624923+00:00",
+      "smtp_message_id": "<119c9b9010f5acd778124c66df6b674ac52f787de2eda566956c3875c7a59035@paperflow.local>"
+    }
+  ],
+  "received_count": 6,
+  "profile_source": {
+    "name": "Springer LNCS class 2.22",
+    "version": "llncs-2.22",
+    "source": "https://resource-cms.springernature.com/springer-cms/rest/v1/content/19238648/data/v8",
+    "requirements": {
+      "text_width_mm": 122,
+      "text_height_mm": 193,
+      "font_size_pt": 10,
+      "columns": 1,
+      "tolerance_mm": 1
+    },
+    "note": "Verified against the publisher class redistributed in signed TeX Live. No conference-specific page limit or unverified publisher requirements are asserted. DOCX body textblock dimensions are compared against class dimensions; style equivalence requires final editorial acknowledgment."
+  },
+  "ai_check": "skipped: no provider credentials configured",
+  "evidence_path": "/workspace/AUTONOMOUS_REVIEWER.ai/data/agent-runs/agent-160ced58",
+  "n8n_executions": [
+    {
+      "workflow": "paperflowcommunicate",
+      "status": "success",
+      "executions": 31
+    },
+    {
+      "workflow": "paperflowcomplete",
+      "status": "success",
+      "executions": 31
+    },
+    {
+      "workflow": "paperflowintake",
+      "status": "success",
+      "executions": 31
+    },
+    {
+      "workflow": "paperflowpublication",
+      "status": "success",
+      "executions": 31
+    },
+    {
+      "workflow": "paperflowreminders",
+      "status": "success",
+      "executions": 31
+    }
+  ],
+  "artifact_hashes": {
+    "b39e36759f364f8ab63b3183d846ffc2.pdf": "90a2635d10fb98dce10e618e2667f87e6b450f94c7f8f63f6a3788f578c6a3be",
+    "book-of-abstracts.html": "e3cc4e2746f8ddbaffcdb03430834b7e48393beb9dd90f88c5f463ba8b3677bd",
+    "audit.json": "2d920cba9448d5b30f819007601e33a931f33046ffdeec71ad5a2b6265c26afe",
+    "publication-package.zip": "effb49fb6411bc23bd8c96976f14afa00ac7d41066dd7a01f12801b7be126a9b",
+    "metadata.csv": "81aba2c640ef086e98038f39f9fc5ee1b409f67e78c819ff2e5ceaa895e62500",
+    "camera-ready-sources.zip": "9c9ad53188d1239038ac3f66f8f85945c75096e5c87c6cb70a9813f783bbd054",
+    "fce0db73efa3437ea54d192092f004ba.pdf": "955b38a05f824ca1f009155280f8f25eb3b9c9ac45ffdfd638c6ca3338b7411c",
+    "0d4c16ac40384794b606653c81d7f4f3.pdf": "fbf91eceaa1e1bbcb3f725174494435f18b99017875d8ce4a5a61bc6ee2c517c",
+    "1724413743ec4c009b44b368a28df446.pdf": "8a71328e3450e43ce3b1bc2847b45640942db3300d1f3c4e82387361a1cef9e7",
+    "book-of-abstracts.pdf": "2a25b15700b67ac5135c854403d4692ea642ab1a1ee78f6672849b02f2d38af7",
+    "book-of-abstracts.docx": "92f2077befc71850d6628f6239e318dd13454e0cc5e7ed9d8d9ca57bb3f03738",
+    "proceedings.pdf": "ad7a288074521ca7a88950033f47bd980a8d1a9c7c3980f1a0bafc6fe025ac7c",
+    "56b4650957c4462ab0371c1977341b02.pdf": "73f986cc2417894dafde965c1c1e2a1b845bd62ea58c67a27a067bfa702aeec8"
+  },
+  "book_pages": 8,
+  "proceedings_pages": 5
+}

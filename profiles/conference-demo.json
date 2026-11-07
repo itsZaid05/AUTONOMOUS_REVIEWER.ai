@@ -1,0 +1,13 @@
+{
+  "name": "Springer LNCS class 2.22",
+  "version": "llncs-2.22",
+  "source": "https://resource-cms.springernature.com/springer-cms/rest/v1/content/19238648/data/v8",
+  "requirements": {
+    "text_width_mm": 122,
+    "text_height_mm": 193,
+    "font_size_pt": 10,
+    "columns": 1,
+    "tolerance_mm": 1
+  },
+  "note": "Verified against the publisher class redistributed in signed TeX Live. No conference-specific page limit or unverified publisher requirements are asserted. DOCX body textblock dimensions are compared against class dimensions; style equivalence requires final editorial acknowledgment."
+}

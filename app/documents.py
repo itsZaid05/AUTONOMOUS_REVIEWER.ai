@@ -38,7 +38,7 @@ def inspect_document(path):
                 if sum(i.file_size for i in z.infolist())>MAX_EXPANDED:raise ValueError('DOCX expansion limit exceeded')
             doc=Document(source)
             result['text']='\n'.join(p.text for p in doc.paragraphs)+'\n'+'\n'.join(c.text for t in doc.tables for r in t.rows for c in r.cells)
-            result['paragraphs']=[{'index':i+1,'text':p.text,'style':p.style.name,'space_before_pt':p.paragraph_format.space_before.pt if p.paragraph_format.space_before else None,'space_after_pt':p.paragraph_format.space_after.pt if p.paragraph_format.space_after else None,'runs':[{'font':r.font.name,'size_pt':r.font.size.pt if r.font.size else None} for r in p.runs if r.text.strip()]} for i,p in enumerate(doc.paragraphs)]
+            result['paragraphs']=[{'index':i+1,'text':p.text,'style':p.style.name,'space_before_pt':p.paragraph_format.space_before.pt if p.paragraph_format.space_before else None,'space_after_pt':p.paragraph_format.space_after.pt if p.paragraph_format.space_after else None,'runs':[{'font':r.font.name or p.style.font.name or doc.styles['Normal'].font.name,'size_pt':r.font.size.pt if r.font.size else (p.style.font.size.pt if p.style.font.size else (doc.styles['Normal'].font.size.pt if doc.styles['Normal'].font.size else None))} for r in p.runs if r.text.strip()]} for i,p in enumerate(doc.paragraphs)]
             result['sections']=[{'width_mm':round(s.page_width.mm,2),'height_mm':round(s.page_height.mm,2),'top_mm':round(s.top_margin.mm,2),'bottom_mm':round(s.bottom_margin.mm,2),'left_mm':round(s.left_margin.mm,2),'right_mm':round(s.right_margin.mm,2),'columns':s._sectPr.xpath('./w:cols')[0].get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}num','1') if s._sectPr.xpath('./w:cols') else '1'} for s in doc.sections]
             try:
                 proc=subprocess.run(['soffice','-env:UserInstallation=file://'+td+'/lo-profile','--headless','--convert-to','pdf','--outdir',td,str(source)],capture_output=True,timeout=90)
@@ -53,17 +53,33 @@ def inspect_document(path):
             mains=[p for p in work.rglob('*.tex') if '\\documentclass' in p.read_text(errors='replace')]
             if len(mains)!=1:raise ValueError('LaTeX project must have exactly one documentclass entry point')
             main=mains[0]
-            result['source_text']=main.read_text(errors='replace')[:500000]
+            result['source_text']='\n'.join(p.read_text(errors='replace') for p in work.rglob('*.tex'))[:500000]
+            probe=r'\AtBeginDocument{\typeout{PAPERFLOW-WIDTH=\the\textwidth}\typeout{PAPERFLOW-HEIGHT=\the\textheight}}\input{'+main.name+'}'
             # No network, no shell escape, no host secrets, no host writable mount outside project.
             container='paperflow-tex-'+uuid.uuid4().hex
-            cmd=['docker','run','--name',container,'--ulimit','cpu=45:45','--ulimit','fsize=52428800:52428800','--rm','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--pids-limit=64','--memory=512m','--cpus=1','--user',f'{os.getuid()}:{os.getgid()}','--tmpfs','/tmp:rw,noexec,nosuid,size=64m','-v',f'{work}:/work:rw','-w','/work/'+str(main.parent.relative_to(work)),'paperflow-tex:local','pdflatex','-no-shell-escape','-interaction=nonstopmode','-halt-on-error',main.name]
+            cmd=['docker','run','--name',container,'--ulimit','cpu=45:45','--ulimit','fsize=52428800:52428800','--rm','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--pids-limit=64','--memory=512m','--cpus=1','--user',f'{os.getuid()}:{os.getgid()}','--tmpfs','/tmp:rw,noexec,nosuid,size=64m','-v',f'{work}:/work:rw','-w','/work/'+str(main.parent.relative_to(work)),'paperflow-tex:local','pdflatex','-no-shell-escape','-interaction=nonstopmode','-halt-on-error','-jobname='+main.stem,probe]
             try:
                 p=subprocess.run(cmd,capture_output=True,timeout=60)
+                if not p.returncode:
+                    p=subprocess.run(cmd,capture_output=True,timeout=60)
                 if p.returncode:raise ValueError('Isolated LaTeX compilation failed: '+p.stdout.decode(errors='replace')[-1800:])
+                output=p.stdout.decode(errors='replace')
+                for label,key in [('WIDTH','text_width_mm'),('HEIGHT','text_height_mm')]:
+                    match=re.search(r'PAPERFLOW-'+label+r'=([0-9.]+)pt',output)
+                    if match:result[key]=round(float(match.group(1))*25.4/72.27,2)
+                result['latex_warnings']=[line for line in output.splitlines() if 'undefined' in line.lower() or 'multiply defined' in line.lower()]
                 target=source.with_suffix('.rendered.pdf');shutil.copyfile(main.with_suffix('.pdf'),target)
                 result['rendered_pdf']=str(target);result['pages']=pdf_info(target)
             except subprocess.TimeoutExpired:raise ValueError('LaTeX compilation exceeded 60 seconds')
             finally:subprocess.run(['docker','rm','-f',container],capture_output=True,timeout=15)
         if not result['text']:result['text']='\n'.join(p['text'] for p in result['pages'])
+        txt=result['text']
+        abstract=re.search(r'\bAbstract\s*[:.—-]?\s*(.*?)(?=\bKeywords\b|\bIndex Terms\b|\n\s*Introduction\b|\Z)',txt,re.I|re.S)
+        keywords=re.search(r'\b(?:Keywords|Index Terms)\s*[:.—-]?\s*([^\n]+)',txt,re.I)
+        result['metadata']={'abstract':abstract.group(1).strip() if abstract else '', 'keywords':keywords.group(1).strip() if keywords else ''}
+        if result.get('source_text'):
+            labels=set(re.findall(r'\\label\{([^}]+)\}',result['source_text']))
+            refs=set(re.findall(r'\\(?:ref|eqref)\{([^}]+)\}',result['source_text']))
+            result['unresolved_references']=sorted(refs-labels)
         result['notes'].append('Reading order, equations, figure quality, semantic accuracy, and citation style require editorial review.')
     return result

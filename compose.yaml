@@ -51,6 +51,9 @@ services:
     image: n8nio/n8n:1.123.0
     environment:
       PAPERFLOW_API_URL: http://api:8000
+      PAPERFLOW_CONFERENCE_ID: ${PAPERFLOW_CONFERENCE_ID:-conference}
+      NO_PROXY: api,postgres,redis,mailpit,localhost,127.0.0.1
+      no_proxy: api,postgres,redis,mailpit,localhost,127.0.0.1
       N8N_DIAGNOSTICS_ENABLED: 'false'
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
     volumes: ['n8ndata:/home/node/.n8n']

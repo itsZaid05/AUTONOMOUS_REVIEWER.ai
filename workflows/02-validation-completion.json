@@ -1,37 +1,39 @@
 {
   "id": "paperflowcomplete",
-  "name": "PaperFlow \u00b7 Validation Completion",
+  "versionId": "77fc6915-dfb7-4c4f-967f-d67c6b6b93a8",
+  "name": "PaperFlow Agent \u00b7 Validation complete \u2192 report \u2192 policy-approved author email",
   "active": false,
   "nodes": [
     {
-      "id": "040e9cfc-8aa1-489d-8d0c-794380e392ce",
-      "name": "Receive event",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "paperflow-complete",
-        "responseMode": "lastNode",
-        "options": {}
-      },
+      "id": "eb500ccf-ecf0-46fd-8828-77500726ef38",
+      "name": "Scheduled lifecycle check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
         0,
         0
-      ]
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      }
     },
     {
       "id": "025d6ee2-e8c8-4d26-b836-7249054827d7",
-      "name": "Perform approved operation",
+      "name": "Execute completed",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/complete\" }}",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/agent/\" + $env.PAPERFLOW_CONFERENCE_ID + \"/completed\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.body) }}",
         "options": {
           "timeout": 120000
         }
@@ -39,15 +41,18 @@
       "position": [
         320,
         0
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     }
   ],
   "connections": {
-    "Receive event": {
+    "Scheduled lifecycle check": {
       "main": [
         [
           {
-            "node": "Perform approved operation",
+            "node": "Execute completed",
             "type": "main",
             "index": 0
           }
@@ -58,7 +63,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "pinData": {},
-  "tags": [],
-  "versionId": "5609eb50-69d2-42db-8b98-24a08a6169f2"
+  "pinData": {}
 }

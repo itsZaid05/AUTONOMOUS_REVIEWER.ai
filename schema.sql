@@ -1,4 +1,47 @@
 
+CREATE TABLE agent_conferences (
+	id VARCHAR NOT NULL,
+	config JSON NOT NULL,
+	enabled BOOLEAN NOT NULL,
+	publication JSON NOT NULL,
+	exception TEXT NOT NULL,
+	PRIMARY KEY (id)
+)
+
+;
+
+
+CREATE TABLE agent_dispatches (
+	id VARCHAR NOT NULL,
+	conference_id VARCHAR NOT NULL,
+	paper_id VARCHAR NOT NULL,
+	version INTEGER NOT NULL,
+	kind VARCHAR NOT NULL,
+	recipient VARCHAR NOT NULL,
+	subject TEXT NOT NULL,
+	body TEXT NOT NULL,
+	attachment TEXT NOT NULL,
+	state VARCHAR NOT NULL,
+	error TEXT NOT NULL,
+	created TIMESTAMP WITH TIME ZONE NOT NULL,
+	sent TIMESTAMP WITH TIME ZONE,
+	PRIMARY KEY (id)
+)
+
+;
+
+
+CREATE TABLE agent_receipts (
+	id VARCHAR NOT NULL,
+	conference_id VARCHAR NOT NULL,
+	state VARCHAR NOT NULL,
+	details JSON NOT NULL,
+	PRIMARY KEY (id)
+)
+
+;
+
+
 CREATE TABLE audit (
 	id SERIAL NOT NULL,
 	paper_id VARCHAR NOT NULL,
@@ -34,6 +77,25 @@ CREATE TABLE papers (
 	approved_version INTEGER,
 	created TIMESTAMP WITH TIME ZONE NOT NULL,
 	PRIMARY KEY (id)
+)
+
+;
+
+
+CREATE TABLE agent_enrollments (
+	id VARCHAR NOT NULL,
+	conference_id VARCHAR NOT NULL,
+	external_id VARCHAR NOT NULL,
+	paper_id VARCHAR NOT NULL,
+	handled_version INTEGER NOT NULL,
+	state VARCHAR NOT NULL,
+	deadline TIMESTAMP WITH TIME ZONE,
+	details JSON NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (conference_id, external_id),
+	FOREIGN KEY(conference_id) REFERENCES agent_conferences (id),
+	UNIQUE (paper_id),
+	FOREIGN KEY(paper_id) REFERENCES papers (id)
 )
 
 ;

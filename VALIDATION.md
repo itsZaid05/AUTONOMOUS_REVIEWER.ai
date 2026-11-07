@@ -1,3 +1,22 @@
+# Autonomous Springer agent validation
+
+Final recorded run: `agent-771bdecb`. See AGENT_DEMO_RESULTS.json and AUTONOMOUS.md.
+
+- Full regression suite: 14 tests passed, including stable source detection, durable intake/message idempotency, unsafe path rejection, notification policy gating, concurrent schedule fairness, original-preserving safe correction, real two-pass LNCS rendering/geometry, secure portal handoff, reminder cancellation, SMTP delivery to local Mailpit, and the retained document/publication tests.
+- Five actively scheduled n8n 1.123.0 workflows completed the lifecycle without manual lifecycle endpoint calls. All five have successful persisted executions and no execution errors in the final run. Initial implementation issues with CLI version history, REST readiness, local service routing and schedule-lock starvation were diagnosed and corrected before the successful run.
+- Initial cases: Paper 1 publication-ready; Paper 2 had actual DOCX font/textblock errors; Paper 3 failed actual LaTeX compilation; Paper 4 had repeated-word and missing-affiliation findings; Paper 5 had a repeated-word finding and awaited a timed reminder.
+- Four correction emails, one real two-minute reminder, and one coordinator publication notice were received by Mailpit (6 matched SMTP message IDs). Authors 2–4 revised through watched folders; author 5 used the signed portal. Revisions were revalidated and compared, all five reached publication-ready, and no later reminder was sent.
+- Total final workflow time: 150.95 seconds. Book PDF: 8 pages. Consolidated proceedings: 5 pages. PDF/DOCX/HTML book, five individual PDFs, source ZIP, metadata CSV, audit, and complete publication ZIP were downloaded and checksummed.
+- Official LLNCS 2.22 class retained from the signed Debian TeX Live publisher package. Its declared 122 mm × 193 mm textblock was checked against actual compilation. Direct publisher-package download remained policy-blocked; no network or verification bypass was used.
+- Autonomous Streamlit dashboard rendered through its UI test harness with no exceptions. Updated application/TeX images built; isolated Compose startup, API/PostgreSQL health, autonomous endpoints and dashboard health checks passed.
+- AI/provider credentials were absent. This controlled demo explicitly disabled the production AI prerequisite and records AI proofreading as skipped. No AI-backed linguistic accuracy or external SMTP/TLS delivery is claimed. Production defaults require configured AI analysis and the final unsupported-check/authorization gate.
+
+Detailed status snapshots, API/n8n logs, received email contents, source/revision fixtures, audit events and generated outputs are retained at `/workspace/AUTONOMOUS_REVIEWER.ai/data/agent-runs/agent-771bdecb` (ignored, not for committing). Temporary plaintext credential exports were removed. Environment publication and Git push were not performed.
+
+---
+
+## Earlier manual development validation (historical)
+
 # Executed validation
 
 - Python dependency consistency: `pip check` passed.

@@ -1,4 +1,6 @@
-# PaperFlow AI
+# PaperFlow AI — Autonomous Springer Conference Agent
+
+The primary workflow is now the single-conference autonomous Springer agent. See [AUTONOMOUS.md](AUTONOMOUS.md) for once-only configuration, active n8n schedules, timed reminders, watched-folder revisions and the real five-paper rehearsal. The existing manual document tools remain available as a secondary workspace.
 
 Conference Proceedings Control Center with FastAPI, Streamlit, PostgreSQL, Celery/Redis, document inspection, editorial approvals, revision links, SMTP reports, and publication exports. All application actions use persistent records and real files. External AI and reference services are optional and disabled by default.
 
@@ -54,7 +56,11 @@ Optional environment settings:
 
 Missing optional services, provider errors and extraction uncertainty appear in check coverage. They are not reported as passes.
 
-## n8n workflows (target 1.123.0)
+## Legacy manual workflow notes
+
+The five current workflow exports have been replaced by the scheduled autonomous flows documented in AUTONOMOUS.md. The following describes the retained manual API compatibility layer.
+
+### Manual API orchestration (target 1.123.0)
 
 Five inactive importable exports live in `workflows/01-*.json` through `05-*.json`. Import each into n8n, set `PAPERFLOW_API_URL=http://api:8000`, and bind each HTTP Request node to an n8n Header Auth credential with header name `Authorization` and value `Bearer <your administrator token>`. No exported credential IDs or values are included. Keep webhooks and schedules inactive until ready. The owner setup for n8n remains yours.
 
