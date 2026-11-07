@@ -13,6 +13,44 @@ def call(method,path,**kwargs):
     if not r.ok: st.error(r.text);st.stop()
     return r
 if not token: st.info('Enter the administrator token to continue.');st.stop()
+mode=st.sidebar.radio('Workspace',['Autonomous Springer conference','Manual document tools'])
+if mode=='Autonomous Springer conference':
+    choices=call('GET','/agent/conferences').json()
+    if not choices:
+        st.info('Configure a conference using PUT /agent/conferences/{id}; see AUTONOMOUS.md.')
+        st.stop()
+    cid=st.selectbox('Conference batch',[c['id'] for c in choices])
+    state=call('GET','/agent/conferences/'+cid).json()
+    st.caption('Scheduled n8n workflows control intake, validation, notifications, reminders, revisions and publication.')
+    if state['exception']:st.warning(state['exception'])
+    with st.expander('Ingestion exception queue'):
+        st.dataframe([r for r in state['receipts'] if r['state']=='Exception'],width='stretch')
+    st.dataframe([{k:p[k] for k in ['external_id','title','state','version','deadline','next_reminder']} for p in state['papers']],width='stretch')
+    if st.button('Refresh conference status'):st.rerun()
+    for p in state['papers']:
+        with st.expander(p['external_id']+' · '+p['state']):
+            st.write('Deadline (UTC):',p['deadline']);st.write('Next reminder (UTC):',p['next_reminder']);st.json(p['details'])
+            st.dataframe(p['issues'],width='stretch');st.json(p['comparison'])
+            st.dataframe(p['messages'],width='stretch')
+            if p['validation'] in ['Complete','Failed']:
+                st.download_button('Correction report',call('GET','/agent/reports/'+p['version_id']).content,file_name=p['external_id']+'-report.pdf',key='agentreport'+p['paper_id'])
+            detail=call('GET','/papers/'+p['paper_id']).json()
+            st.write('Version history', [{k:v[k] for k in ['number','state','filename']} for v in detail['versions']])
+            if p['state'] in ['Exception','Overdue']:
+                st.info('Resolve metadata in Manual document tools, or update the conference policy for an explicitly reviewed unsupported check.')
+                if st.button('Re-evaluate resolved exception',key='recheck'+p['paper_id']):call('POST','/agent/'+cid+'/recheck/'+p['paper_id']);st.rerun()
+    if state['publication']:
+        pub=state['publication']
+        for filename in pub['files']:
+            st.download_button(filename,call('GET','/publications/'+pub['publication_id']+'/'+filename).content,file_name=filename,key='agentpub'+filename)
+    with st.expander('Conference notification and final publication policy'):
+        import json
+        policy=st.text_area('Coordinator policy JSON',json.dumps(state['policy'],indent=2),height=300)
+        if st.button('Save coordinator policy'):
+            try:parsed=json.loads(policy)
+            except ValueError:st.error('Invalid JSON');st.stop()
+            call('PUT','/agent/conferences/'+cid,json=parsed);st.rerun()
+    st.stop()
 rows=call('GET','/papers').json()
 a,b,c=st.columns(3)
 a.metric('Submissions',len(rows));b.metric('Processing',sum(r['status'] in ['Submitted','Processing','Resubmitted'] for r in rows));c.metric('Approved',sum(r['status']=='Approved' for r in rows))

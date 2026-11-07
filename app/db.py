@@ -55,3 +55,46 @@ class Event(Base):
     id: Mapped[str]=mapped_column(String,primary_key=True)
     state: Mapped[str]=mapped_column(String,default='Processing')
     result: Mapped[dict]=mapped_column(JSON,default=dict)
+
+class Conference(Base):
+    __tablename__='agent_conferences'
+    id: Mapped[str]=mapped_column(String,primary_key=True)
+    config: Mapped[dict]=mapped_column(JSON)
+    enabled: Mapped[bool]=mapped_column(Boolean,default=False)
+    publication: Mapped[dict]=mapped_column(JSON,default=dict)
+    exception: Mapped[str]=mapped_column(Text,default='')
+
+class Enrollment(Base):
+    __tablename__='agent_enrollments'
+    __table_args__=(UniqueConstraint('conference_id','external_id'),)
+    id: Mapped[str]=mapped_column(String,primary_key=True)
+    conference_id: Mapped[str]=mapped_column(ForeignKey('agent_conferences.id'))
+    external_id: Mapped[str]=mapped_column(String)
+    paper_id: Mapped[str]=mapped_column(ForeignKey('papers.id'),unique=True)
+    handled_version: Mapped[int]=mapped_column(Integer,default=0)
+    state: Mapped[str]=mapped_column(String,default='Received')
+    deadline: Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)
+    details: Mapped[dict]=mapped_column(JSON,default=dict)
+
+class Receipt(Base):
+    __tablename__='agent_receipts'
+    id: Mapped[str]=mapped_column(String,primary_key=True)
+    conference_id: Mapped[str]=mapped_column(String)
+    state: Mapped[str]=mapped_column(String)
+    details: Mapped[dict]=mapped_column(JSON,default=dict)
+
+class Dispatch(Base):
+    __tablename__='agent_dispatches'
+    id: Mapped[str]=mapped_column(String,primary_key=True)
+    conference_id: Mapped[str]=mapped_column(String,index=True)
+    paper_id: Mapped[str]=mapped_column(String)
+    version: Mapped[int]=mapped_column(Integer)
+    kind: Mapped[str]=mapped_column(String)
+    recipient: Mapped[str]=mapped_column(String)
+    subject: Mapped[str]=mapped_column(Text)
+    body: Mapped[str]=mapped_column(Text)
+    attachment: Mapped[str]=mapped_column(Text,default='')
+    state: Mapped[str]=mapped_column(String,default='Pending')
+    error: Mapped[str]=mapped_column(Text,default='')
+    created: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=now)
+    sent: Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)

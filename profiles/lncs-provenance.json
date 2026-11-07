@@ -1,0 +1,16 @@
+{
+  "publisher": "Springer Verlag",
+  "class": "LLNCS 2.22 (2022-09-05)",
+  "redistribution": "Debian signed package texlive-publishers 2022.20230122-4",
+  "publisher_reference": "https://resource-cms.springernature.com/springer-cms/rest/v1/content/19238648/data/v8",
+  "sha256": "8152fe7afa929cbd3f3679d6f7c1d562525414ed9c5940a69e86cd923416cb2b",
+  "declared_text_width_mm": 122,
+  "declared_text_height_mm": 193,
+  "body_font_pt": 10,
+  "body_font_basis": "LLNCS loads article with no fontsize option; article default is 10pt",
+  "unverified": [
+    "conference page limit",
+    "publisher DOCX style mapping",
+    "semantic/figure/caption requirements"
+  ]
+}

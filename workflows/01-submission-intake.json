@@ -1,37 +1,39 @@
 {
   "id": "paperflowintake",
-  "name": "PaperFlow \u00b7 Submission Intake",
+  "versionId": "ff8c8e3b-d1f5-4588-b0f0-57566e57536e",
+  "name": "PaperFlow Agent \u00b7 Detect new bundles \u2192 segregate \u2192 queue validation",
   "active": false,
   "nodes": [
     {
-      "id": "e629ffb3-64b7-40b7-b923-90e0f05d371a",
-      "name": "Receive event",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "paperflow-intake",
-        "responseMode": "lastNode",
-        "options": {}
-      },
+      "id": "8052e551-4417-46ad-bd38-f2d48435b7c6",
+      "name": "Scheduled lifecycle check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
         0,
         0
-      ]
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      }
     },
     {
       "id": "f8478b1e-89bc-472e-9afe-95d4f23f5dee",
-      "name": "Perform approved operation",
+      "name": "Execute intake",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/intake\" }}",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/agent/\" + $env.PAPERFLOW_CONFERENCE_ID + \"/intake\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.body) }}",
         "options": {
           "timeout": 120000
         }
@@ -39,15 +41,18 @@
       "position": [
         320,
         0
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     }
   ],
   "connections": {
-    "Receive event": {
+    "Scheduled lifecycle check": {
       "main": [
         [
           {
-            "node": "Perform approved operation",
+            "node": "Execute intake",
             "type": "main",
             "index": 0
           }
@@ -58,7 +63,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "pinData": {},
-  "tags": [],
-  "versionId": "b2c96c58-3e46-42a9-a787-0725ec96f4b2"
+  "pinData": {}
 }

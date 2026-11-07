@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     public_url: str = 'http://localhost:8000'
     smtp_host: str = '127.0.0.1'
     smtp_port: int = 1025
+    smtp_username: str = ''
+    smtp_password: str = ''
+    smtp_starttls: bool = False
+    smtp_ssl: bool = False
     mail_from: str = 'editor@conference.test'
     ai_provider: str = 'disabled'
     ai_model: str = ''

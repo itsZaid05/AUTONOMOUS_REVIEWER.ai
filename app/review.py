@@ -13,8 +13,8 @@ class AIReview(BaseModel):
 def profile_path(name):
     local=settings.storage/'profiles'/f'{name}.json'
     return local if local.exists() else Path('profiles')/f'{name}.json'
-def review(doc,profile,pid):
-    config=json.loads(profile_path(profile).read_text());rules=config['requirements'];issues=[];checks=[]
+def review(doc,profile,pid,config=None):
+    config=config or json.loads(profile_path(profile).read_text());rules=config['requirements'];issues=[];checks=[]
     def add(category,severity,location,problem,expected,evidence,suggestion='',confidence=1):
         fingerprint=hashlib.sha256((category+'|'+location+'|'+problem).encode()).hexdigest()[:16]
         issues.append(dict(paper_id=pid,category=category,severity=severity,location=location,observed_problem=problem,expected_requirement=expected,evidence=str(evidence)[:2000],suggested_correction=suggestion,confidence=confidence,fingerprint=fingerprint))
@@ -32,8 +32,21 @@ def review(doc,profile,pid):
         if not page['text'].strip():add('extraction','review',loc,'No extractable text','Readable document text','Scanned or blank page','Upload a text-based source or review scan')
     if 'max_pages' in rules and len(doc['pages'])>rules['max_pages']:add('page_count','error','document','Page limit exceeded',str(rules['max_pages']),len(doc['pages']))
     for i,sec in enumerate(doc.get('sections',[])):
+        for dimension,observed in [('text_width_mm',sec['width_mm']-sec['left_mm']-sec['right_mm']),('text_height_mm',sec['height_mm']-sec['top_mm']-sec['bottom_mm'])]:
+            if dimension in rules and abs(observed-rules[dimension])>rules.get('tolerance_mm',1):add('layout','error',f'section {i+1}',dimension+' differs',str(rules[dimension]),round(observed,2),'Apply the official textblock dimensions')
         for key in ['top_mm','bottom_mm','left_mm','right_mm','columns']:
             if key in rules and abs(float(sec[key])-float(rules[key]))> (0 if key=='columns' else rules.get('tolerance_mm',1)):add('layout','error',f'section {i+1}',key+' differs',str(rules[key]),sec[key],'Apply official section settings')
+    for dimension in ['text_width_mm','text_height_mm']:
+        if dimension in rules and dimension in doc and abs(doc[dimension]-rules[dimension])>rules.get('tolerance_mm',1):add('layout','error','LaTeX rendered layout',dimension+' differs',str(rules[dimension]),doc[dimension],'Use the official template textblock')
+    if config['name'].startswith('Springer LNCS') and doc.get('source_text') and not re.search(r'\\documentclass(?:\[[^]]*\])?\{llncs\}',doc['source_text']):add('template','error','LaTeX source','LNCS document class not detected','Use the configured llncs class','documentclass differs')
+    for warning in doc.get('latex_warnings',[]):add('references','review','LaTeX compiler',warning,'Resolve compiler warnings',warning,'Repair the reported reference or label')
+    for label in doc.get('unresolved_references',[]):add('references','error','LaTeX source','Unresolved reference '+label,'Every reference target must exist',label,'Add the missing label or correct the reference key')
+    for para in doc.get('paragraphs',[]):
+        loc=f"paragraph {para['index']}"
+        for run in para['runs']:
+            if 'font_size_pt' in rules and run['size_pt'] is not None and abs(run['size_pt']-rules['font_size_pt'])>.2 and para['style']=='Normal':add('font','error',loc,'Body font size differs',str(rules['font_size_pt']),run['size_pt'],'Apply the template body style')
+            if 'font_family' in rules and run['font'] and run['font']!=rules['font_family'] and para['style']=='Normal':add('font','error',loc,'Body font family differs',rules['font_family'],run['font'],'Apply the template body font')
+        if re.search(r' {2,}',para['text']):add('spacing','warning',loc,'Repeated spaces','Consistent word spacing',para['text'],'Review spaces without changing scientific content')
     for match in re.finditer(r'\b(\w+)\s+\1\b',text,re.I):
         add('writing','warning',f'character {match.start()}','Repeated adjacent word','Check intended wording',match.group(),'Review repeated word',.9)
     for note in doc['notes']:add('inspection','review','document',note,'Editorial review required',note)

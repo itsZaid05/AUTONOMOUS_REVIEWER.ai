@@ -5,7 +5,7 @@ from fastapi import FastAPI,Depends,Header,HTTPException,UploadFile,File,Form
 from fastapi.responses import FileResponse
 from sqlalchemy import select,text
 from .settings import settings
-from .db import Base,engine,Session,Paper,Version,Audit
+from .db import Base,engine,Session,Paper,Version,Audit,Enrollment,Conference
 from .jobs import validate
 @asynccontextmanager
 async def lifespan(app):
@@ -24,7 +24,7 @@ def health():
 @app.get('/papers',dependencies=[Depends(admin)])
 def papers():
     with Session() as s: return [dict(id=p.id,title=p.title,authors=p.authors,email=p.email,track=p.track,profile=p.profile,status=p.status,latest=p.latest,approved_version=p.approved_version) for p in s.scalars(select(Paper).order_by(Paper.created.desc()))]
-def register(content,filename,metadata,paper_id=None):
+def register(content,filename,metadata,paper_id=None,enqueue=True):
     suffix=Path(filename).suffix.lower()
     if suffix not in {'.docx','.pdf','.tex','.zip'}: raise HTTPException(400,'Supported formats: DOCX, PDF, TEX, ZIP')
     if not content or len(content)>30*1024*1024: raise HTTPException(413,'File must contain 1 byte to 30 MiB')
@@ -36,16 +36,25 @@ def register(content,filename,metadata,paper_id=None):
             if not p: raise HTTPException(404,'Paper not found')
             if s.scalar(select(Version).where(Version.paper_id==paper_id,Version.digest==digest)): raise HTTPException(409,'Identical version already exists')
             p.latest+=1;p.approved_version=None;p.status='Resubmitted'
+            enrollment=s.scalar(select(Enrollment).where(Enrollment.paper_id==p.id))
+            if enrollment:
+                conference=s.get(Conference,enrollment.conference_id)
+                if p.latest>conference.config.get('max_versions',4):raise HTTPException(409,'Correction round limit reached; coordinator intervention required')
+                enqueue=False;enrollment.state='Revision Received';enrollment.deadline=None
+                record(s,p.id,'agent_revision_registered',{'version':p.latest,'validation_trigger':'next n8n revision/intake check'})
         else:
             duplicate=s.scalar(select(Version).where(Version.digest==digest))
             if duplicate: raise HTTPException(409,{'duplicate_of':duplicate.paper_id})
             p=Paper(id=uuid.uuid4().hex,**metadata);s.add(p);s.flush()
         vid=uuid.uuid4().hex
-        path=settings.storage/(vid+suffix)
+        folder=settings.storage/'papers'/p.id/str(p.latest)
+        folder.mkdir(parents=True,exist_ok=True)
+        path=folder/(vid+suffix)
         path.write_bytes(content)
         v=Version(id=vid,paper_id=p.id,number=p.latest,filename=Path(filename).name,digest=digest,path=str(path.resolve()))
         s.add(v);record(s,p.id,'submission',{'version':p.latest,'sha256':digest});s.commit()
-        try: validate.delay(vid)
+        try:
+            if enqueue:validate.delay(vid)
         except Exception:
             v.state='Queue failed';v.error='Broker unavailable; use retry';s.commit()
         return {'paper_id':p.id,'version_id':vid,'version':p.latest,'state':v.state}
@@ -77,3 +86,5 @@ def download(vid: str):
 from . import editorial
 from . import publication
 from . import automation
+
+from . import agent

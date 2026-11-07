@@ -1,37 +1,39 @@
 {
   "id": "paperflowcommunicate",
-  "name": "PaperFlow \u00b7 Author Communication",
+  "versionId": "a15046fb-2095-4f54-99f0-f2125fbd93e5",
+  "name": "PaperFlow Agent \u00b7 Detect revised bundle \u2192 match token \u2192 queue revalidation",
   "active": false,
   "nodes": [
     {
-      "id": "36032f7b-ea86-44c3-a4a7-d46aced84b65",
-      "name": "Receive event",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "paperflow-communicate",
-        "responseMode": "lastNode",
-        "options": {}
-      },
+      "id": "36de4287-9fc1-43dc-b479-56fa1517dbf2",
+      "name": "Scheduled lifecycle check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
         0,
         0
-      ]
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      }
     },
     {
       "id": "c1f8a5ee-c03e-4ee0-9f55-03d3acae6c5f",
-      "name": "Perform approved operation",
+      "name": "Execute revisions",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.PAPERFLOW_API_URL + \"/automation/communicate\" }}",
+        "url": "={{ $env.PAPERFLOW_API_URL + \"/agent/\" + $env.PAPERFLOW_CONFERENCE_ID + \"/revisions\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.body) }}",
         "options": {
           "timeout": 120000
         }
@@ -39,15 +41,18 @@
       "position": [
         320,
         0
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     }
   ],
   "connections": {
-    "Receive event": {
+    "Scheduled lifecycle check": {
       "main": [
         [
           {
-            "node": "Perform approved operation",
+            "node": "Execute revisions",
             "type": "main",
             "index": 0
           }
@@ -58,7 +63,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "pinData": {},
-  "tags": [],
-  "versionId": "7db88837-c1f9-4f11-94fb-3e74b31e6a46"
+  "pinData": {}
 }
