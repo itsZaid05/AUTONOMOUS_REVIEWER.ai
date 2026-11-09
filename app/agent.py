@@ -7,12 +7,13 @@ from pydantic import BaseModel,Field,model_validator
 from fastapi import Depends,HTTPException
 from sqlalchemy import select,text
 from .main import app,admin,register,record
-from .db import Session,Conference,Enrollment,Receipt,Dispatch,Paper,Version,now
+from .db import Session,Conference,Enrollment,Receipt,Dispatch,Paper,Version,now,PublicationDraft
 from .settings import settings
 from .jobs import validate
 from .editorial import serializer,verify
 from .reports import report
 from .mail import send_smtp
+from .lifecycle import transition
 
 class ConferencePolicy(BaseModel):
     name:str
@@ -27,10 +28,13 @@ class ConferencePolicy(BaseModel):
     max_versions:int=Field(default=4,ge=1,le=20)
     profile:dict
     require_ai:bool=True
+    real_paper_mode:bool=False
     normalize_nonbreaking_spaces:bool=True
     acknowledged_manual_checks:list[str]=Field(default_factory=list)
+    check_decisions:dict[str,str]=Field(default_factory=dict)
     @model_validator(mode='after')
     def valid(self):
+        if self.real_paper_mode and not self.require_ai:raise ValueError('Real-paper verification requires successful AI review')
         if len(set(self.expected_papers))!=len(self.expected_papers):raise ValueError('Duplicate paper keys')
         if any(not re.fullmatch(r'[A-Za-z0-9_-]{1,60}',x) for x in self.expected_papers):raise ValueError('Unsafe paper key')
         if not email_ok(self.coordinator_email):raise ValueError('Invalid coordinator email')
@@ -50,14 +54,27 @@ def issue(pid,category,problem,expected,evidence,location='document',severity='e
 def configure(cid:str,body:ConferencePolicy):
     if not re.fullmatch('[a-zA-Z0-9_-]{1,60}',cid):raise HTTPException(400,'Unsafe conference ID')
     # Production requires a locally retained official template, not merely a URL string.
-    if not body.demo_mode and not (settings.storage/'conference-template.docx').exists() and not (settings.storage/'conference-template.zip').exists():
-        raise HTTPException(409,'Retain the verified official template as data/conference-template.docx or .zip before production enablement')
+    from .lncs import template_verified
+    if (not body.demo_mode or body.real_paper_mode) and not template_verified():
+        raise HTTPException(409,'Retain the verified official template as data/conference-template.zip before production enablement')
     with Session() as s:
         c=s.get(Conference,cid)
         if c and s.scalar(select(Enrollment).where(Enrollment.conference_id==cid)):
             old=cfg(c)
             if old.profile!=body.profile or old.expected_papers!=body.expected_papers:raise HTTPException(409,'Freeze template and batch membership after first intake; create a new batch for changed rules')
+        existed=c is not None
+        prior=cfg(c).acknowledged_manual_checks if c else []
+        if body.real_paper_mode:
+            for check in body.acknowledged_manual_checks:
+                reason=body.check_decisions.get(check,'').strip()
+                if len(reason)<10:raise HTTPException(422,'Each unresolved check requires a recorded editorial decision and rationale')
+                if check not in prior or c.config.get('check_decisions',{}).get(check)!=reason:
+                    record(s,cid,'publisher_check_decision',{'check':check,'decision':reason,'actor':'authenticated coordinator'})
         if not c:c=Conference(id=cid);s.add(c)
+        if existed and body.real_paper_mode and body.acknowledged_manual_checks!=prior:
+            for enrollment in s.scalars(select(Enrollment).where(Enrollment.conference_id==cid)):
+                if enrollment.details.get('final_review_checks'):
+                    enrollment.handled_version=0
         c.config=body.model_dump();c.enabled=body.enabled;s.commit()
     inbox(cid).mkdir(parents=True,exist_ok=True)
     return {'conference_id':cid,'enabled':body.enabled,'source_folder':str(inbox(cid).resolve())}
@@ -76,8 +93,8 @@ def status(cid:str):
             if correction and e.state=='Awaiting Revision' and p.latest==e.handled_version:
                 remaining=[offset for offset in cfg(c).reminder_seconds if not any(m['kind']=='reminder-'+str(offset) and m['state'] in ['Sent','Sending','Delivery uncertain'] for m in sent)]
                 if remaining:next_reminder=correction['sent']+timedelta(seconds=min(remaining))
-            entries.append({'next_reminder':next_reminder,'external_id':e.external_id,'paper_id':p.id,'title':p.title,'state':e.state,'version':p.latest,'validation':v.state,'version_id':v.id,'issues':v.result.get('issues',[]),'comparison':v.result.get('comparison',{}),'deadline':e.deadline,'details':e.details,'messages':sent})
-        return {'id':cid,'enabled':c.enabled,'policy':c.config,'exception':c.exception,'publication':c.publication,'papers':entries,'receipts':[{'id':r.id,'state':r.state,'details':r.details} for r in s.scalars(select(Receipt).where(Receipt.conference_id==cid))]}
+            entries.append({'next_reminder':next_reminder,'external_id':e.external_id,'paper_id':p.id,'title':p.title,'state':e.state,'lifecycle_state':e.details.get('lifecycle_state',e.state),'version':p.latest,'validation':v.state,'version_id':v.id,'issues':v.result.get('issues',[]),'comparison':v.result.get('comparison',{}),'deadline':e.deadline,'details':e.details,'messages':sent})
+        return {'id':cid,'enabled':c.enabled,'policy':c.config,'draft':(s.get(PublicationDraft,cid).output if s.get(PublicationDraft,cid) else {}),'exception':c.exception,'publication':c.publication,'papers':entries,'receipts':[{'id':r.id,'state':r.state,'details':r.details} for r in s.scalars(select(Receipt).where(Receipt.conference_id==cid))]}
 
 def metadata_from_source(path):
     """Conservative extraction. Labelled fields or title/author paragraph styles; never guess author order."""
@@ -88,7 +105,11 @@ def metadata_from_source(path):
             d=Document(path);txt='\n'.join(p.text for p in d.paragraphs)
             titles=[p.text for p in d.paragraphs if p.style.name=='Title' and p.text.strip()]
             if len(titles)==1:result['title']=titles[0]
-        elif path.suffix.lower()=='.tex':txt=path.read_text(errors='replace')
+        elif path.suffix.lower()=='.tex':
+            txt=path.read_text(errors='replace')
+            for key,command in [('title','title'),('authors','author'),('affiliation','institute')]:
+                values=re.findall(r'\\'+command+r'\{([^{}]+)\}',txt)
+                if len(values)==1:result[key]=values[0]
         else:
             from .documents import safe_zip
             import tempfile
@@ -157,7 +178,8 @@ def ingest(s,c,revisions=False):
             else:
                 p=s.get(Paper,pid,populate_existing=True)
                 for k,vv in metadata.items():setattr(p,k,vv)
-            e.state='Queued';e.deadline=None;e.details={'metadata_conflicts':conflicts,'source_manifest':str(manifest.relative_to(inbox(c.id)))}
+            e.state='Queued';e.deadline=None;e.details={**(e.details or {}),'metadata_conflicts':conflicts,'source_manifest':str(manifest.relative_to(inbox(c.id))),'metadata_manifest':provided,'metadata_verified':m.get('metadata_verified') is True,'provenance':m.get('provenance',{})}
+            transition(s,e,'Revalidation' if revisions else 'Ingested',r['version'])
             for companion in manifest.parent.glob('*.pdf'):
                 if companion.is_symlink() or companion.stat().st_size>30*1024*1024:continue
                 target=settings.storage/'papers'/r['paper_id']/str(r['version'])/'attachments';target.mkdir(parents=True,exist_ok=True);shutil.copyfile(companion,target/companion.name)
@@ -192,9 +214,13 @@ def deliver(s,c):
         msg.state='Sending';s.commit() # A crash here is uncertain, never blindly resend.
         try:
             send_smtp(mail)
-            msg.state='Sent';msg.sent=now();record(s,msg.paper_id,'agent_email_sent',{'dispatch_id':msg.id,'kind':msg.kind,'recipient':msg.recipient,'message_id':mail['Message-ID']});s.commit();sent.append(msg.id)
+            msg.state='Sent';msg.sent=now()
+            if msg.kind=='correction':transition(s,enrollment,'Awaiting Revision',msg.version)
+            record(s,msg.paper_id,'agent_email_sent',{'dispatch_id':msg.id,'kind':msg.kind,'recipient':msg.recipient,'message_id':mail['Message-ID']});s.commit();sent.append(msg.id)
         except Exception as exc:
-            msg.state='Delivery uncertain';msg.error=type(exc).__name__;s.commit()
+            msg.state='Delivery uncertain';msg.error=type(exc).__name__
+            if msg.paper_id:transition(s,e,'Editorial Exception',msg.version,'Delivery uncertain; reconcile before retry')
+            s.commit()
     return sent
 
 def completed(s,c):
@@ -218,10 +244,25 @@ def completed(s,c):
             value=getattr(p,field)
             if not value or (field=='email' and not email_ok(value)):issues.append(issue(p.id,'metadata',field+' is missing or invalid','Complete corresponding-author metadata',value,correction='Include '+field+' in revision metadata or labelled source paragraphs.'))
         if e.details.get('metadata_conflicts'):issues.append(issue(p.id,'metadata','Submission metadata conflicts with source','Unambiguous metadata',e.details['metadata_conflicts']))
-        for field in ['abstract','keywords']:
+        for field in ([] if v.state=='Failed' else ['abstract','keywords']):
             if not result.get('document',{}).get('metadata',{}).get(field):issues.append(issue(p.id,'metadata',field+' was not extracted','A nonempty '+field,'Not detected'))
-        if conf.require_ai and not any(x.get('check')=='AI proofreading' and x.get('status')=='completed' for x in checks):
-            e.state='Exception';e.details={**e.details,'exception':'Configured AI analysis is required but unavailable'};s.commit();continue
+        if v.state=='Failed':checks.append({'check':'AI proofreading','status':'skipped','reason':'Compilation failed; complete manuscript extraction unavailable'})
+        result['issues']=issues;result['checks']=checks
+        if conf.require_ai and v.state!='Failed' and not any(x.get('check')=='AI proofreading' and x.get('status')=='completed' and x.get('coverage_ratio')==1 and (not conf.real_paper_mode or x.get('provider')=='gemini') for x in checks):
+            v.result=result;e.state='Exception';e.details={**e.details,'exception':'Successful whole-document AI analysis is required but unavailable'};transition(s,e,'Editorial Exception',v.number,e.details.get('exception',''));s.commit();continue
+        if conf.real_paper_mode and v.state!='Failed':
+            manifest=e.details.get('metadata_manifest',{})
+            document=result.get('document',{})
+            normalized=' '.join(document.get('text','').split()).casefold()
+            verified=e.details.get('metadata_verified',False) and all(manifest.get(k) for k in ['title','authors','affiliation','email','abstract','keywords'])
+            verified=verified and all(' '.join(str(manifest[k]).split())==' '.join(str(getattr(p,k)).split()) for k in ['title','authors','affiliation','email'])
+            verified=verified and all(' '.join(manifest[k].split()).casefold() in normalized for k in ['abstract','keywords'])
+            if not verified:
+                v.result=result;e.state='Exception';e.details={**e.details,'exception':'Verified author/abstract/keyword manifest is required; resolve extraction ambiguity'};transition(s,e,'Editorial Exception',v.number,e.details['exception']);s.commit();continue
+            document={**document,'verified_metadata':manifest};result['document']=document
+        if conf.real_paper_mode and v.state=='Failed' and not e.details.get('metadata_verified'):
+            v.result=result;e.state='Exception';e.details={**e.details,'exception':'Confirm author identity before sending a technical compilation report'};transition(s,e,'Editorial Exception',v.number,e.details['exception']);s.commit();continue
+        issues=list({i['fingerprint']:i for i in issues}.values())
         unknown=[x['check'] for x in checks if x.get('status')=='requires_review' and x['check'] not in conf.acknowledged_manual_checks]
         # Linguistic/reference findings may require author correction even when not layout errors.
         blocking=[i for i in issues if i['severity']=='error' or i['category'] in ['writing','grammar','ai_writing','references','structure']]
@@ -231,11 +272,17 @@ def completed(s,c):
         v.result=result
         html,pdf=report(p,v)
         e.handled_version=p.latest
+        if not blocking:transition(s,e,'Automated Checks Passed',v.number)
         if not blocking and not unknown:
             e.state='Publication Ready';e.deadline=None;p.status='Publication Ready'
+            transition(s,e,'Eligible for Draft Book',v.number)
             record(s,p.id,'agent_publication_ready',{'version':p.latest,'not_publisher_certification':True})
         elif not blocking and unknown:
-            e.state='Publication Ready';e.deadline=None;p.status='Publication Ready';e.details={**e.details,'final_review_checks':unknown}
+            e.deadline=None;e.details={**e.details,'final_review_checks':unknown}
+            if conf.real_paper_mode:
+                e.state='Exception';p.status='Under Review';e.details={**e.details,'exception':'Editorial decisions required for unsupported checks'}
+                transition(s,e,'Editorial Exception',v.number,e.details['exception'])
+            else:e.state='Publication Ready';p.status='Publication Ready'
         elif p.latest>=conf.max_versions:
             e.state='Exception';e.deadline=None;e.details={**e.details,'exception':'Maximum correction rounds reached'}
             enqueue_mail(s,c,p,v,'round-limit',conf.coordinator_email,'Correction limit reached: '+e.external_id,'Please resolve this submission in the exception queue.')
@@ -246,6 +293,8 @@ def completed(s,c):
             token=serializer.dumps({'paper':p.id,'scope':'revision'})
             body=f'Dear {p.authors or "author"},\n\nYour paper {e.external_id} ({p.title}) requires corrections. Please see the attached evidence report.\nDeadline (UTC): {e.deadline.isoformat()}\nSecure resubmission: {settings.public_url}/revise/{token}\n\n'+'\n'.join('- '+i['observed_problem']+': '+i['suggested_correction'] for i in blocking[:12])+'\n\nConference Editorial Team'
             enqueue_mail(s,c,p,v,'correction',p.email,'Corrections required ['+e.external_id+'] v'+str(v.number),body,str(pdf.resolve()))
+        if e.state=='Exception':transition(s,e,'Editorial Exception',v.number,e.details.get('exception',''))
+        elif e.state=='Awaiting Revision':transition(s,e,'Corrections Required',v.number)
         record(s,p.id,'agent_review_completed',{'version':p.latest,'state':e.state,'blocking':len(blocking),'unverified':unknown});s.commit();handled.append(p.id)
     return handled
 
@@ -263,14 +312,42 @@ def reminders(s,c):
                 enqueue_mail(s,c,p,v,'reminder-'+str(offset),p.email,'Revision reminder ['+e.external_id+']',correction.body,correction.attachment);out.append(e.external_id)
         if now()>=e.deadline:
             enqueue_mail(s,c,p,v,'overdue',conf.coordinator_email,'Overdue manuscript ['+e.external_id+']','The author has not submitted a valid revised manuscript. Please resolve this exception.')
-            e.state='Overdue';record(s,p.id,'agent_escalated',{'deadline':e.deadline.isoformat()})
+            e.state='Overdue';transition(s,e,'Editorial Exception',v.number,'Revision deadline expired');record(s,p.id,'agent_escalated',{'deadline':e.deadline.isoformat()})
         s.commit()
     return out
+
+def update_draft(s,c):
+    from .publication import build,PublicationRequest
+    entries=list(s.scalars(select(Enrollment).where(Enrollment.conference_id==c.id)))
+    selected=[]
+    for e in entries:
+        p=s.get(Paper,e.paper_id,populate_existing=True);v=latest(s,p)
+        if e.state=='Publication Ready' and e.handled_version==p.latest and v.result.get('document',{}).get('verified_metadata'):selected.append((p,v))
+    signature=hashlib.sha256(json.dumps(sorted((p.id,v.number,v.digest,hashlib.sha256(json.dumps(v.result['document']['verified_metadata'],sort_keys=True).encode()).hexdigest()) for p,v in selected)).encode()).hexdigest()
+    draft=s.get(PublicationDraft,c.id)
+    if draft and draft.signature==signature:return draft.output
+    if not draft:draft=PublicationDraft(conference_id=c.id);s.add(draft)
+    if selected:
+        output=build(PublicationRequest(conference=cfg(c).name,information='DRAFT — incomplete conference batch; not authorized for release.',paper_ids=[p.id for p,v in selected]),draft=True)
+        root=settings.storage/'publications'/output['publication_id']
+        with zipfile.ZipFile(root/'draft-package.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for file in root.iterdir():
+                if file.name!='draft-package.zip':z.write(file,file.name)
+        output['files']=sorted(file.name for file in root.iterdir());output['generated_at']=now().isoformat()
+    else:output={'draft':True,'included':[],'files':[],'generated_at':now().isoformat()}
+    output['excluded']=[{'paper_id':e.paper_id,'state':e.state} for e in entries if e.paper_id not in {p.id for p,v in selected}]
+    draft.signature=signature;draft.output=output;draft.updated=now();record(s,c.id,'draft_updated',{'included':output['included'],'signature':signature});s.commit()
+    return output
 
 def assembly(s,c):
     from .publication import publish,PublicationRequest
     conf=cfg(c)
-    if c.publication:return c.publication
+    update_draft(s,c)
+    if c.publication:
+        current={e.paper_id:e.handled_version for e in s.scalars(select(Enrollment).where(Enrollment.conference_id==c.id)) if e.state=='Publication Ready'}
+        included={p['paper_id']:p['version'] for p in c.publication.get('included',[])}
+        if current==included:return c.publication
+        c.exception='Previously released package is superseded; renewed publication authorization required';s.commit();return {'exception':c.exception}
     entries=list(s.scalars(select(Enrollment).where(Enrollment.conference_id==c.id)))
     if {e.external_id for e in entries}!=set(conf.expected_papers):return {'waiting':'batch intake incomplete'}
     if any(e.state!='Publication Ready' for e in entries):return {'waiting':'papers not ready'}
@@ -282,6 +359,7 @@ def assembly(s,c):
     for e in entries:
         p=s.get(Paper,e.paper_id,with_for_update=True,populate_existing=True)
         if p.latest!=e.handled_version:return {'waiting':'revision not reviewed'}
+        transition(s,e,'Final Publication Authorized',p.latest,'Conference coordinator authorization')
         p.status='Approved';p.approved_version=p.latest;record(s,p.id,'conference_policy_approved',{'conference':c.id,'version':p.latest})
     s.commit()
     # Persist intent before side effect; a crash is surfaced, never silently assembles twice.
@@ -321,7 +399,7 @@ def tick(cid:str,stage:str):
                         if version.state in ['Queued','Queue failed']:validate.delay(version.id)
                 sent=deliver(s,c)
                 record(s,cid,'n8n_stage',{'stage':stage,'sent':sent,'result':result});s.commit()
-                return {'stage':stage,'result':result,'sent':sent}
+                return {'conference':cid,'stage':stage,'result':result,'sent':sent}
         finally:lock.execute(text('SELECT pg_advisory_unlock(:key)'),{'key':key});lock.commit()
 
 @app.get('/agent/{cid}/dispatches',dependencies=[Depends(admin)])

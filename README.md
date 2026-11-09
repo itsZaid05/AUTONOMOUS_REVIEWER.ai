@@ -1,24 +1,26 @@
 # PaperFlow AI — Autonomous Springer Conference Agent
 
-The primary workflow is now the single-conference autonomous Springer agent. See [AUTONOMOUS.md](AUTONOMOUS.md) for once-only configuration, active n8n schedules, timed reminders, watched-folder revisions and the real five-paper rehearsal. The existing manual document tools remain available as a secondary workspace.
+Use [REAL_DEMO.md](REAL_DEMO.md) for the Windows/WSL2 real-paper setup and [DEMO_RECORDING.md](DEMO_RECORDING.md) for the recording walkthrough. Run `bash scripts/start_demo.sh` from a WSL terminal to create the local verification environment, generate private local configuration, start Docker Compose and retain the reviewed LNCS class.
 
-Conference Proceedings Control Center with FastAPI, Streamlit, PostgreSQL, Celery/Redis, document inspection, editorial approvals, revision links, SMTP reports, and publication exports. All application actions use persistent records and real files. External AI and reference services are optional and disabled by default.
+The real-paper acceptance run is **incomplete**. The existing Gemini key is present in the cloud environment, but the provider request fails through its network proxy. Five real manuscripts have not been supplied. See [REAL_ACCEPTANCE_RESULTS.md](REAL_ACCEPTANCE_RESULTS.md) for the PASS/FAIL/NOT TESTED matrix and [verification](verification) for recorded regression and infrastructure evidence. Historical synthetic demonstrations are not real-paper acceptance evidence.
+
+FastAPI performs document operations; five n8n schedules drive ingestion, review completion, reminders, revisions and publication. PostgreSQL stores lifecycle state; Redis/Celery runs validation jobs; Mailpit captures test messages locally. Gemini is mandatory in real-paper mode. LanguageTool is optional and its skipped/failed analysis is reported explicitly.
 
 ## Run locally with Docker
 
-Requires Docker Engine with Compose v2, Linux container support, and about 4 GB free disk. The worker must reach a local Docker daemon for isolated TeX compilation. Use only on a trusted development host; mounting the Docker socket grants substantial host privileges to the worker. Production deployment needs a separate restricted compilation service, TLS, user accounts/roles, rate limiting, database migrations/backups, and operational monitoring.
+Requires Docker Desktop with WSL2 integration, Linux containers, Python 3 with venv, and Docker Compose v2. Read [REAL_DEMO.md](REAL_DEMO.md) before enabling the conference workflow.
 
 ```sh
-python3 scripts/init_env.py
-docker build -f Dockerfile.tex -t paperflow-tex:local .
-docker compose up -d --build --wait
+bash scripts/start_demo.sh
 ```
 
-Use port 8501 for the dashboard, 8000 for the API, 5678 for n8n, and 8025 for Mailpit. Bindings are loopback-only. Obtain the administrator token from your local `.env` using your editor, and enter it in the dashboard. Do not share credentials in chat or commit `.env`. Set `PUBLIC_URL` to your TLS-protected externally reachable API address before sharing revision links. Default localhost links are for local testing only.
+A dedicated network-disabled compilation service handles LaTeX. Application workers do not mount the Docker socket. The compiler has a read-only root filesystem, resource limits and separate restricted identities for compilation jobs. No application credentials are passed to it.
 
-On a managed cloud machine, builds must retain proxy and CA settings. Build the application with `docker build --secret id=proxy_ca,src=/etc/ssl/certs/ca-certificates.crt -t paperflow-app:local .`; add the same `proxy_ca` build secret when using Compose behind a TLS interception proxy. Never disable TLS or package-signature checks.
+Use http://localhost:8501 for the dashboard, http://localhost:8000/docs for the API, http://localhost:5678 for n8n, and http://localhost:8025 for Mailpit, after running Compose on your own PC. Bindings are loopback-only. Edit `.env` privately to set the Gemini key and existing n8n owner credentials. Never commit or screen-record the file. `PUBLIC_URL=http://localhost:8000` is appropriate for the local controlled demo; sharing author links beyond your PC requires a reachable protected API address.
 
-`data/` and named PostgreSQL, Redis and n8n volumes persist. Back up both database and files together. `docker compose down` preserves named volumes; do not use `down -v` unless you intend to erase the database.
+Managed-cloud builds require the configured proxy and CA trust. Use the `proxy_ca` BuildKit secret as documented in [REAL_DEMO.md](REAL_DEMO.md); keep TLS verification enabled.
+
+`data/`, local real-paper inputs and named PostgreSQL, Redis and n8n volumes are private persistent state. Back up the database and files together. `docker compose down` preserves named volumes; `down -v` erases them.
 
 ## Current cloud development instance
 

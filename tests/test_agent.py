@@ -141,5 +141,5 @@ def test_shared_smtp_transport_reaches_local_mailpit():
     marker='transport-'+uuid.uuid4().hex
     mail=EmailMessage();mail['From']='test@example.test';mail['To']='controlled-inbox@example.test';mail['Subject']=marker;mail['Message-ID']='<'+marker+'@paperflow.test>';mail.set_content('A real local SMTP transport verification.')
     send_smtp(mail)
-    response=httpx.get('http://127.0.0.1:8025/api/v1/messages');response.raise_for_status()
+    response=httpx.get(settings.mailpit_api_url.rstrip('/')+'/api/v1/messages',trust_env=False);response.raise_for_status()
     assert any(m['Subject']==marker for m in response.json()['messages'])

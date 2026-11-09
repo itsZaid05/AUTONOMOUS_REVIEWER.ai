@@ -41,6 +41,8 @@ def register(content,filename,metadata,paper_id=None,enqueue=True):
                 conference=s.get(Conference,enrollment.conference_id)
                 if p.latest>conference.config.get('max_versions',4):raise HTTPException(409,'Correction round limit reached; coordinator intervention required')
                 enqueue=False;enrollment.state='Revision Received';enrollment.deadline=None
+                from .lifecycle import transition
+                transition(s,enrollment,'Revalidation',p.latest,'Valid signed author revision received')
                 record(s,p.id,'agent_revision_registered',{'version':p.latest,'validation_trigger':'next n8n revision/intake check'})
         else:
             duplicate=s.scalar(select(Version).where(Version.digest==digest))
@@ -67,7 +69,7 @@ def detail(pid: str):
     with Session() as s:
         p=s.get(Paper,pid)
         if not p: raise HTTPException(404,'Paper not found')
-        return {'paper':{k:getattr(p,k) for k in ['id','title','authors','email','affiliation','track','status','latest','approved_version','profile']},'versions':[{'id':v.id,'number':v.number,'filename':v.filename,'state':v.state,'result':v.result,'error':v.error} for v in s.scalars(select(Version).where(Version.paper_id==pid).order_by(Version.number))],'audit':[{'action':a.action,'details':a.details,'created':a.created} for a in s.scalars(select(Audit).where(Audit.paper_id==pid))]}
+        return {'paper':{k:getattr(p,k) for k in ['id','title','authors','email','affiliation','track','status','latest','approved_version','profile']},'versions':[{'id':v.id,'number':v.number,'filename':v.filename,'sha256':v.digest,'state':v.state,'result':v.result,'error':v.error} for v in s.scalars(select(Version).where(Version.paper_id==pid).order_by(Version.number))],'audit':[{'action':a.action,'details':a.details,'created':a.created} for a in s.scalars(select(Audit).where(Audit.paper_id==pid))]}
 @app.post('/versions/{vid}/retry',dependencies=[Depends(admin)])
 def retry(vid: str):
     with Session() as s:
@@ -88,3 +90,4 @@ from . import publication
 from . import automation
 
 from . import agent
+from . import real_setup

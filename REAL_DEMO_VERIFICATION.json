@@ -1,0 +1,73 @@
+{
+  "external_inputs": {
+    "manifest_present": false,
+    "gemini_key_configured": true,
+    "gemini_model_configured": false
+  },
+  "conference": "real-lncs",
+  "started_at": 1794169107.8080652,
+  "acceptance": {
+    "gemini_connectivity": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "real_ingestion": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "isolated_compilation": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "whole_document_analysis": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "lncs_rules": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "gemini_invocations": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "five_active_n8n_workflows": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "mailpit_isolation": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "correction_delivery": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "scheduled_reminder": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "revision_revalidation": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "draft_and_output_integrity": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "final_authorization": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    },
+    "restart_deduplication": {
+      "status": "NOT TESTED",
+      "reason": "Not executed"
+    }
+  },
+  "complete": false,
+  "blocker": {
+    "type": "ValueError",
+    "reason": "Five real manuscripts and their metadata/revision manifest have not been supplied"
+  },
+  "finished_at": 1794169107.8704681
+}

@@ -1,0 +1,337 @@
+{
+  "complete": false,
+  "generated_at": 1794169199.0562432,
+  "suite_a": {
+    "status": "PASS",
+    "tests": 29,
+    "failures_and_errors": 0,
+    "junit": "verification/suite-a.xml",
+    "source": "current working tree",
+    "provider_contract_stubs_are_not_gemini_evidence": true
+  },
+  "gemini": {
+    "observed_at": 1794168859.9574142,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "key_available": true,
+    "status": "FAIL",
+    "error_type": "ProxyError",
+    "reason": "Request failed; credentials and provider exception text withheld"
+  },
+  "matrix": [
+    {
+      "criterion": "Suite A regression",
+      "status": "PASS",
+      "evidence": "29 tests; 0 failures/errors; actual local PostgreSQL, LibreOffice, isolated TeX and Mailpit transport exercised"
+    },
+    {
+      "criterion": "Runtime services and five active n8n workflows",
+      "status": "PASS",
+      "evidence": "Actual readiness probes, 5 activated workflows and 20 recent successful idle executions; not manuscript lifecycle evidence"
+    },
+    {
+      "criterion": "Actual Gemini connectivity",
+      "status": "FAIL",
+      "evidence": "Key available: True; ProxyError; active policy does not allow generativelanguage.googleapis.com"
+    },
+    {
+      "criterion": "One bulk upload of five genuine sources",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Independent ingestion, segregation, verified metadata and rendering",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Official-template checks and full-document Gemini review",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Real paper-specific correction PDFs",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "SMTP correction receipt and attachment integrity for real papers",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "n8n scheduled reminder for real paper",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Author portal receives actual corrected paper",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Automatic revalidation and resolved/remaining/new comparisons",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Draft regenerates from newly eligible current versions",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Final authorized PDF/DOCX, proceedings and archive generation",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Real output metadata, contents, author index and hashes inspected",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    },
+    {
+      "criterion": "Service restart with no duplicate papers, mail or reminders",
+      "status": "NOT TESTED",
+      "evidence": "Five real manuscripts, metadata and a real corrected version have not been supplied; Gemini is blocked by network policy"
+    }
+  ],
+  "suite_a_fixture_outputs": {
+    "label": "Regression fixture artifacts only; NOT real-paper acceptance outputs",
+    "files_sha256": {
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/draft-package.zip": "27e2a4b995ffdffffb9cf3add9a51507314b3b115fb600533663f4c6f3597963",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/9d7d87131e64455caaf5e7855b8d0792.pdf": "b96b384c31d5931668c5f21869ece29ce353b2dca45f435f48d5c9572cab750d",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/book-of-abstracts.html": "2707d4f486f1697808108d9a2ca917d963c3c21035919c1d9060811e668048c0",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/audit.json": "0a8041312d6284e204deee338b9d18fe95cbd0e53b7988bff5fad563ef364580",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/metadata.csv": "00e6cc3324af9e89db634908d643ce8ec0e0bb12411324be4dc2b5724ff162e0",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/camera-ready-sources.zip": "38ce665014944c1ceaa078c4da9e2d99f8e27b16f0af457a9525fecc4c3abaf3",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/book-of-abstracts.pdf": "f589f2b8c537691a31f36a13576c185e1e4cf24d9dc76a890d02560a425154e0",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/book-of-abstracts-docx.pdf": "6e6e68e2022d83a00808c93fe28b5fe3a8ef9e7855846884c82a42396c4b780c",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/book-of-abstracts.docx": "f51b605f4efd15f94ac79d4915b9fb50a8a94eb9ed9c2ed462c64d80d680613f",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/proceedings.pdf": "5d72cd216ee6555f6eff841ad3f44c5981f9f908cdc320035decbd2fe6171407",
+      "data/publications/24da00c8b8f846ebbcce6f9d02e7332b/pagination.json": "821de5ccf9c6306d594801d340997763390fd7dda8c72ae93119686831945c64"
+    }
+  },
+  "workflow_exports_sha256": {
+    "workflows/01-submission-intake.json": "1fb4f93729b77d176f31ddd0aa9ca1e05d6ceba4e814d808015cafdfb06a0d8f",
+    "workflows/02-validation-completion.json": "192f85044de5b40c6bbe0927d58dcc01466c4518cdce99e2e8271b79fe41b693",
+    "workflows/03-author-communication.json": "fc868f9d441b8d2b7b8fd865adea5b5ad4f6e26ed10c50a2b4fce238f3f0fb92",
+    "workflows/04-reminders-escalation.json": "55638d3158ebeec84ed6b4a22115721fa6ed8f45598b9b5c03826adecac90de7",
+    "workflows/05-publication-assembly.json": "805aa8ef9b2a1e16c6a6ad0f7a7d4d80dde9e2976744db58eaadb737c60e7c69"
+  },
+  "external_inputs_required": [
+    "Upload five authorized genuine DOCX/LaTeX sources and a corrected version with verified metadata",
+    "Allow generativelanguage.googleapis.com in the active cloud environment network policy; existing key is already present",
+    "Record individual unsupported-check editorial decisions and final publication authorization before Suite B final release"
+  ],
+  "platform_limit": "Linux Docker verified; native Windows/WSL2 acceptance not executed",
+  "historical_demo_results_used": false,
+  "runtime": {
+    "observed_at": 1794169291.377231,
+    "real_paper_acceptance": false,
+    "setup": {
+      "dependencies": {
+        "fastapi": "Connected",
+        "celery": "Connected",
+        "n8n": "Connected",
+        "postgresql": "Connected",
+        "redis": "Connected",
+        "mailpit": "Connected",
+        "gemini": "Configured",
+        "compiler": "Connected",
+        "official_template": "Connected",
+        "languagetool": "Optional"
+      },
+      "ai_model": "gemini-2.5-flash",
+      "mail_mode": "DEMO",
+      "live_ready": false
+    },
+    "workflows": [
+      {
+        "id": "J8uKtYtrkO09hQYI",
+        "active": true
+      },
+      {
+        "id": "aZjftfK94mVMnoDm",
+        "active": true
+      },
+      {
+        "id": "jhjejaQVtduTORN4",
+        "active": true
+      },
+      {
+        "id": "17gEGof8fWyAW85v",
+        "active": true
+      },
+      {
+        "id": "Wj74KnvAxRa2mV2l",
+        "active": true
+      }
+    ],
+    "recent_successful_executions": [
+      {
+        "id": "66235",
+        "workflowId": "Wj74KnvAxRa2mV2l",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:30.233Z",
+        "stoppedAt": "2026-11-08T20:21:30.258Z"
+      },
+      {
+        "id": "66234",
+        "workflowId": "17gEGof8fWyAW85v",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:30.233Z",
+        "stoppedAt": "2026-11-08T20:21:30.261Z"
+      },
+      {
+        "id": "66233",
+        "workflowId": "J8uKtYtrkO09hQYI",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:30.233Z",
+        "stoppedAt": "2026-11-08T20:21:30.269Z"
+      },
+      {
+        "id": "66232",
+        "workflowId": "aZjftfK94mVMnoDm",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:30.232Z",
+        "stoppedAt": "2026-11-08T20:21:30.274Z"
+      },
+      {
+        "id": "66231",
+        "workflowId": "jhjejaQVtduTORN4",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:30.232Z",
+        "stoppedAt": "2026-11-08T20:21:30.266Z"
+      },
+      {
+        "id": "66230",
+        "workflowId": "Wj74KnvAxRa2mV2l",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:25.018Z",
+        "stoppedAt": "2026-11-08T20:21:25.041Z"
+      },
+      {
+        "id": "66229",
+        "workflowId": "17gEGof8fWyAW85v",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:25.018Z",
+        "stoppedAt": "2026-11-08T20:21:25.048Z"
+      },
+      {
+        "id": "66228",
+        "workflowId": "J8uKtYtrkO09hQYI",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:25.018Z",
+        "stoppedAt": "2026-11-08T20:21:25.044Z"
+      },
+      {
+        "id": "66227",
+        "workflowId": "jhjejaQVtduTORN4",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:25.017Z",
+        "stoppedAt": "2026-11-08T20:21:25.055Z"
+      },
+      {
+        "id": "66226",
+        "workflowId": "aZjftfK94mVMnoDm",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:25.018Z",
+        "stoppedAt": "2026-11-08T20:21:25.051Z"
+      },
+      {
+        "id": "66225",
+        "workflowId": "17gEGof8fWyAW85v",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:20.019Z",
+        "stoppedAt": "2026-11-08T20:21:20.044Z"
+      },
+      {
+        "id": "66224",
+        "workflowId": "Wj74KnvAxRa2mV2l",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:20.018Z",
+        "stoppedAt": "2026-11-08T20:21:20.053Z"
+      },
+      {
+        "id": "66223",
+        "workflowId": "aZjftfK94mVMnoDm",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:20.018Z",
+        "stoppedAt": "2026-11-08T20:21:20.048Z"
+      },
+      {
+        "id": "66222",
+        "workflowId": "J8uKtYtrkO09hQYI",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:20.018Z",
+        "stoppedAt": "2026-11-08T20:21:20.050Z"
+      },
+      {
+        "id": "66221",
+        "workflowId": "jhjejaQVtduTORN4",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:20.018Z",
+        "stoppedAt": "2026-11-08T20:21:20.041Z"
+      },
+      {
+        "id": "66220",
+        "workflowId": "Wj74KnvAxRa2mV2l",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:15.018Z",
+        "stoppedAt": "2026-11-08T20:21:15.049Z"
+      },
+      {
+        "id": "66219",
+        "workflowId": "17gEGof8fWyAW85v",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:15.018Z",
+        "stoppedAt": "2026-11-08T20:21:15.045Z"
+      },
+      {
+        "id": "66218",
+        "workflowId": "aZjftfK94mVMnoDm",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:15.017Z",
+        "stoppedAt": "2026-11-08T20:21:15.042Z"
+      },
+      {
+        "id": "66217",
+        "workflowId": "jhjejaQVtduTORN4",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:15.017Z",
+        "stoppedAt": "2026-11-08T20:21:15.055Z"
+      },
+      {
+        "id": "66216",
+        "workflowId": "J8uKtYtrkO09hQYI",
+        "status": "success",
+        "startedAt": "2026-11-08T20:21:15.017Z",
+        "stoppedAt": "2026-11-08T20:21:15.052Z"
+      }
+    ],
+    "compiler": {
+      "network_mode": "none",
+      "read_only": true,
+      "cap_drop": [
+        "ALL"
+      ],
+      "cap_add": [
+        "CAP_CHOWN",
+        "CAP_DAC_OVERRIDE",
+        "CAP_KILL",
+        "CAP_SETGID",
+        "CAP_SETUID"
+      ],
+      "pids_limit": 64,
+      "memory_limit": 805306368,
+      "mount_destinations": [
+        "/queue"
+      ],
+      "docker_socket_present": false
+    },
+    "notes": [
+      "No real manuscripts supplied; idle n8n executions are infrastructure evidence only.",
+      "Gemini connectivity separately failed with ProxyError; no model/key validity established."
+    ]
+  }
+}

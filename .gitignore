@@ -4,3 +4,6 @@ data/*
 __pycache__/
 .pytest_cache/
 *.pyc
+
+.verify-venv/
+real-papers/

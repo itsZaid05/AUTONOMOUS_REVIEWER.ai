@@ -1,0 +1,209 @@
+{
+  "observed_at": 1794169420.8965435,
+  "real_paper_acceptance": false,
+  "setup": {
+    "dependencies": {
+      "fastapi": "Connected",
+      "celery": "Connected",
+      "n8n": "Connected",
+      "postgresql": "Connected",
+      "redis": "Connected",
+      "mailpit": "Connected",
+      "gemini": "Configured",
+      "compiler": "Connected",
+      "official_template": "Connected",
+      "languagetool": "Optional"
+    },
+    "ai_model": "gemini-2.5-flash",
+    "mail_mode": "DEMO",
+    "live_ready": false
+  },
+  "workflows": [
+    {
+      "id": "J8uKtYtrkO09hQYI",
+      "active": true
+    },
+    {
+      "id": "aZjftfK94mVMnoDm",
+      "active": true
+    },
+    {
+      "id": "jhjejaQVtduTORN4",
+      "active": true
+    },
+    {
+      "id": "17gEGof8fWyAW85v",
+      "active": true
+    },
+    {
+      "id": "Wj74KnvAxRa2mV2l",
+      "active": true
+    }
+  ],
+  "recent_successful_executions": [
+    {
+      "id": "66365",
+      "workflowId": "17gEGof8fWyAW85v",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:40.019Z",
+      "stoppedAt": "2026-11-08T20:23:40.048Z"
+    },
+    {
+      "id": "66364",
+      "workflowId": "Wj74KnvAxRa2mV2l",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:40.019Z",
+      "stoppedAt": "2026-11-08T20:23:40.045Z"
+    },
+    {
+      "id": "66363",
+      "workflowId": "aZjftfK94mVMnoDm",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:40.019Z",
+      "stoppedAt": "2026-11-08T20:23:40.070Z"
+    },
+    {
+      "id": "66362",
+      "workflowId": "J8uKtYtrkO09hQYI",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:40.019Z",
+      "stoppedAt": "2026-11-08T20:23:40.052Z"
+    },
+    {
+      "id": "66361",
+      "workflowId": "jhjejaQVtduTORN4",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:40.018Z",
+      "stoppedAt": "2026-11-08T20:23:40.056Z"
+    },
+    {
+      "id": "66360",
+      "workflowId": "17gEGof8fWyAW85v",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:35.020Z",
+      "stoppedAt": "2026-11-08T20:23:35.049Z"
+    },
+    {
+      "id": "66359",
+      "workflowId": "jhjejaQVtduTORN4",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:35.020Z",
+      "stoppedAt": "2026-11-08T20:23:35.055Z"
+    },
+    {
+      "id": "66358",
+      "workflowId": "aZjftfK94mVMnoDm",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:35.020Z",
+      "stoppedAt": "2026-11-08T20:23:35.046Z"
+    },
+    {
+      "id": "66357",
+      "workflowId": "J8uKtYtrkO09hQYI",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:35.020Z",
+      "stoppedAt": "2026-11-08T20:23:35.059Z"
+    },
+    {
+      "id": "66356",
+      "workflowId": "Wj74KnvAxRa2mV2l",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:35.019Z",
+      "stoppedAt": "2026-11-08T20:23:35.065Z"
+    },
+    {
+      "id": "66355",
+      "workflowId": "jhjejaQVtduTORN4",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:30.018Z",
+      "stoppedAt": "2026-11-08T20:23:30.042Z"
+    },
+    {
+      "id": "66354",
+      "workflowId": "Wj74KnvAxRa2mV2l",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:30.018Z",
+      "stoppedAt": "2026-11-08T20:23:30.056Z"
+    },
+    {
+      "id": "66353",
+      "workflowId": "J8uKtYtrkO09hQYI",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:30.018Z",
+      "stoppedAt": "2026-11-08T20:23:30.052Z"
+    },
+    {
+      "id": "66352",
+      "workflowId": "17gEGof8fWyAW85v",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:30.018Z",
+      "stoppedAt": "2026-11-08T20:23:30.049Z"
+    },
+    {
+      "id": "66351",
+      "workflowId": "aZjftfK94mVMnoDm",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:30.018Z",
+      "stoppedAt": "2026-11-08T20:23:30.044Z"
+    },
+    {
+      "id": "66350",
+      "workflowId": "jhjejaQVtduTORN4",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:25.021Z",
+      "stoppedAt": "2026-11-08T20:23:25.044Z"
+    },
+    {
+      "id": "66349",
+      "workflowId": "Wj74KnvAxRa2mV2l",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:25.021Z",
+      "stoppedAt": "2026-11-08T20:23:25.050Z"
+    },
+    {
+      "id": "66348",
+      "workflowId": "J8uKtYtrkO09hQYI",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:25.021Z",
+      "stoppedAt": "2026-11-08T20:23:25.057Z"
+    },
+    {
+      "id": "66347",
+      "workflowId": "17gEGof8fWyAW85v",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:25.021Z",
+      "stoppedAt": "2026-11-08T20:23:25.046Z"
+    },
+    {
+      "id": "66346",
+      "workflowId": "aZjftfK94mVMnoDm",
+      "status": "success",
+      "startedAt": "2026-11-08T20:23:25.020Z",
+      "stoppedAt": "2026-11-08T20:23:25.054Z"
+    }
+  ],
+  "compiler": {
+    "network_mode": "none",
+    "read_only": true,
+    "cap_drop": [
+      "ALL"
+    ],
+    "cap_add": [
+      "CAP_CHOWN",
+      "CAP_DAC_OVERRIDE",
+      "CAP_KILL",
+      "CAP_SETGID",
+      "CAP_SETUID"
+    ],
+    "pids_limit": 64,
+    "memory_limit": 805306368,
+    "mount_destinations": [
+      "/queue"
+    ],
+    "docker_socket_present": false
+  },
+  "notes": [
+    "No real manuscripts supplied; idle n8n executions are infrastructure evidence only.",
+    "Gemini connectivity separately failed with ProxyError; no model/key validity established."
+  ]
+}
