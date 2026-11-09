@@ -118,6 +118,18 @@ CREATE TABLE messages (
 ;
 
 
+CREATE TABLE publication_drafts (
+	conference_id VARCHAR NOT NULL,
+	signature VARCHAR NOT NULL,
+	output JSON NOT NULL,
+	updated TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (conference_id),
+	FOREIGN KEY(conference_id) REFERENCES agent_conferences (id)
+)
+
+;
+
+
 CREATE TABLE versions (
 	id VARCHAR NOT NULL,
 	paper_id VARCHAR NOT NULL,

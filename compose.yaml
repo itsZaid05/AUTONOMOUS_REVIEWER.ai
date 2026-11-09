@@ -5,9 +5,21 @@ x-app: &app
   environment:
     DATABASE_URL: postgresql+psycopg://paperflow:${POSTGRES_PASSWORD:?required}@postgres:5432/paperflow
     REDIS_URL: redis://redis:6379/0
+    NO_PROXY: api,n8n,postgres,redis,mailpit,localhost,127.0.0.1
+    no_proxy: api,n8n,postgres,redis,mailpit,localhost,127.0.0.1
+    AI_PROVIDER: ${AI_PROVIDER:-gemini}
+    AI_MODEL: ${AI_MODEL:-gemini-2.5-flash}
+    AI_API_KEY: ${AI_API_KEY:-${GEMINI_API_KEY:-${GOOGLE_API_KEY:-}}}
     SMTP_HOST: mailpit
+    SMTP_PORT: 1025
+    N8N_URL: http://n8n:5678
+    MAIL_MODE: DEMO
+    MAILPIT_API_URL: http://mailpit:8025
+    COMPILE_QUEUE: /compile-queue
+  networks: [default, mail]
   volumes:
     - ./data:/workspace/AUTONOMOUS_REVIEWER.ai/data
+    - compilequeue:/compile-queue
   depends_on:
     postgres: {condition: service_healthy}
     redis: {condition: service_healthy}
@@ -39,29 +51,64 @@ services:
     command: ['celery','-A','app.jobs.queue','worker','--concurrency=2','--loglevel=INFO']
     volumes:
       - ./data:/workspace/AUTONOMOUS_REVIEWER.ai/data
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp:/tmp
+      - compilequeue:/compile-queue
+  compiler:
+    build:
+      context: .
+      dockerfile: compiler/Dockerfile
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, SETUID, SETGID, KILL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 768m
+    cpus: 1
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=512m,mode=1777"]
+    volumes: ["compilequeue:/queue"]
   dashboard:
     <<: *app
     command: ['streamlit','run','app/dashboard.py','--server.address=0.0.0.0','--browser.gatherUsageStats=false']
     environment:
       API_URL: http://api:8000
+      PUBLIC_PREVIEW: ${PUBLIC_PREVIEW:-false}
     ports: ['127.0.0.1:8501:8501']
   n8n:
     image: n8nio/n8n:1.123.0
     environment:
       PAPERFLOW_API_URL: http://api:8000
       PAPERFLOW_CONFERENCE_ID: ${PAPERFLOW_CONFERENCE_ID:-conference}
-      NO_PROXY: api,postgres,redis,mailpit,localhost,127.0.0.1
-      no_proxy: api,postgres,redis,mailpit,localhost,127.0.0.1
+      NO_PROXY: api,n8n,postgres,redis,mailpit,localhost,127.0.0.1
+      no_proxy: api,n8n,postgres,redis,mailpit,localhost,127.0.0.1
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-false}
       N8N_DIAGNOSTICS_ENABLED: 'false'
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
     volumes: ['n8ndata:/home/node/.n8n']
     ports: ['127.0.0.1:5678:5678']
   mailpit:
+    networks: [mail]
     image: axllent/mailpit:v1.27
-    ports: ['127.0.0.1:8025:8025']
+    command: ["--disable-version-check"]
+  mailpit-ui:
+    image: paperflow-mailpit-ui:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.mailpit-ui
+    user: '101:101'
+    networks: [default, mail]
+    depends_on: [mailpit]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m,mode=1777"]
+    ports: ['127.0.0.1:8025:8080']
 volumes:
+  compilequeue:
   pgdata:
   redisdata:
   n8ndata:
+
+networks:
+  default: {}
+  mail:
+    internal: true

@@ -6,29 +6,62 @@ st.markdown('<style>.stApp{background:#f5f7fc}h1,h2,h3{color:#173456}div[data-te
 st.title('📚 Conference Proceedings Control Center')
 st.caption('PaperFlow AI · Evidence-based review · Editorial control')
 base=os.getenv('API_URL','http://127.0.0.1:8000')
-token=st.sidebar.text_input('Administrator token',type='password',value=os.getenv('ADMIN_TOKEN',''))
+public_preview=os.getenv('PUBLIC_PREVIEW','false').lower() in ['1','true','yes']
+token=st.sidebar.text_input('Administrator token',type='password',value='' if public_preview else os.getenv('ADMIN_TOKEN',''))
 headers={'Authorization':'Bearer '+token}
 def call(method,path,**kwargs):
     r=requests.request(method,base+path,headers=headers,timeout=120,**kwargs)
     if not r.ok: st.error(r.text);st.stop()
     return r
 if not token: st.info('Enter the administrator token to continue.');st.stop()
+with st.sidebar.expander('Setup and connectivity'):
+    readiness=call('GET','/setup/status').json();st.json(readiness)
+    if st.button('Verify Gemini connection'):
+        st.json(call('POST','/setup/verify-gemini').json())
 mode=st.sidebar.radio('Workspace',['Autonomous Springer conference','Manual document tools'])
 if mode=='Autonomous Springer conference':
+    with st.expander('Create a real-paper conference batch'):
+        import json
+        new_cid=st.text_input('New conference ID','real-lncs')
+        new_policy={'name':'Springer LNCS conference','expected_papers':['paper-'+str(i) for i in range(1,6)],'coordinator_email':'coordinator@example.test','enabled':True,'demo_mode':True,'real_paper_mode':True,'require_ai':True,'notifications_enabled':True,'publication_authorized':False,'deadline_seconds':360,'reminder_seconds':[120,300],'profile':json.load(open('profiles/conference-demo.json'))}
+        new_config=st.text_area('Initial real-paper policy',json.dumps(new_policy,indent=2),height=300)
+        if st.button('Create configured batch'):
+            call('PUT','/agent/conferences/'+new_cid,json=json.loads(new_config));st.rerun()
     choices=call('GET','/agent/conferences').json()
     if not choices:
-        st.info('Configure a conference using PUT /agent/conferences/{id}; see AUTONOMOUS.md.')
+        st.info('One-time conference setup; secrets are read only from secure environment settings.')
+        import json
+        conference_id=st.text_input('Conference ID','real-lncs')
+        initial={'name':'Springer LNCS conference','expected_papers':['paper-'+str(i) for i in range(1,6)],'coordinator_email':'coordinator@example.test','enabled':True,'demo_mode':True,'real_paper_mode':True,'require_ai':True,'notifications_enabled':True,'publication_authorized':False,'deadline_seconds':360,'reminder_seconds':[120,300],'profile':json.load(open('profiles/conference-demo.json'))}
+        config=st.text_area('Conference configuration',json.dumps(initial,indent=2),height=350)
+        if st.button('Save initial conference configuration'):
+            call('PUT','/agent/conferences/'+conference_id,json=json.loads(config));st.rerun()
         st.stop()
     cid=st.selectbox('Conference batch',[c['id'] for c in choices])
     state=call('GET','/agent/conferences/'+cid).json()
+    with st.expander('Upload real manuscripts and verified author manifest'):
+        sources=st.file_uploader('DOCX or LaTeX manuscripts',type=['docx','tex','zip'],accept_multiple_files=True,key='real-sources')
+        manifest_file=st.file_uploader('Optional metadata CSV or verified JSON manifest',type=['csv','json'],key='real-manifest')
+        if st.button('Submit batch to autonomous intake',disabled=not sources):
+            uploaded=[('files',(f.name,f.getvalue())) for f in sources];fields={}
+            if manifest_file:
+                if manifest_file.name.lower().endswith('.csv'):uploaded.append(('metadata_csv',(manifest_file.name,manifest_file.getvalue())))
+                else:fields['manifest']=manifest_file.getvalue().decode('utf-8')
+            response=call('POST','/agent/conferences/'+cid+'/bulk',files=uploaded,data=fields)
+            st.json(response.json())
+    if state.get('draft'):
+        draft=state['draft'];st.subheader('Current draft — not authorized for release')
+        st.write('Included versions',draft.get('included',[]));st.write('Excluded / pending',draft.get('excluded',[]));st.write('Generated at',draft.get('generated_at'))
+        for filename in draft.get('files',[]):
+            st.download_button('Draft '+filename,call('GET','/publications/'+draft['publication_id']+'/'+filename).content,file_name=filename,key='draft'+filename)
     st.caption('Scheduled n8n workflows control intake, validation, notifications, reminders, revisions and publication.')
     if state['exception']:st.warning(state['exception'])
     with st.expander('Ingestion exception queue'):
         st.dataframe([r for r in state['receipts'] if r['state']=='Exception'],width='stretch')
-    st.dataframe([{k:p[k] for k in ['external_id','title','state','version','deadline','next_reminder']} for p in state['papers']],width='stretch')
+    st.dataframe([{k:p[k] for k in ['external_id','title','lifecycle_state','version','deadline','next_reminder']} for p in state['papers']],width='stretch')
     if st.button('Refresh conference status'):st.rerun()
     for p in state['papers']:
-        with st.expander(p['external_id']+' · '+p['state']):
+        with st.expander(p['external_id']+' · '+p['lifecycle_state']):
             st.write('Deadline (UTC):',p['deadline']);st.write('Next reminder (UTC):',p['next_reminder']);st.json(p['details'])
             st.dataframe(p['issues'],width='stretch');st.json(p['comparison'])
             st.dataframe(p['messages'],width='stretch')

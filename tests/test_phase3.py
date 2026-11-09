@@ -12,10 +12,11 @@ def test_report_approval_revision_and_publication(monkeypatch):
     c=TestClient(app);h={'Authorization':'Bearer '+settings.admin_token}
     d=Document();d.add_heading('Integration manuscript '+uuid.uuid4().hex,0);d.add_paragraph('Abstract');d.add_paragraph('The the experiment tests reporting.');d.add_paragraph('Keywords: workflow');d.add_heading('References',1)
     b=io.BytesIO();d.save(b)
-    r=c.post('/submissions',headers=h,files={'file':('integration.docx',b.getvalue())},data={'title':'Integration paper','authors':'Test Author','email':'author@example.test'})
+    r=c.post('/submissions',headers=h,files={'file':('integration.docx',b.getvalue())},data={'title':'Integration paper','authors':'Test Author','email':'author@example.test','affiliation':'Test University'})
     assert r.status_code==200,r.text
     p=r.json();pid=p['paper_id'];vid=p['version_id'];assert process(vid)['state']=='Complete'
     assert c.get('/versions/'+vid+'/report',headers=h).content.startswith(b'%PDF')
+    assert c.post('/papers/'+pid+'/metadata/verify',headers=h,json={'title':'Integration paper','authors':'Test Author','affiliation':'Test University','email':'author@example.test','abstract':'The the experiment tests reporting.','keywords':'workflow','verified':True}).status_code==200
     assert c.post('/papers/'+pid+'/approve',headers=h,json={}).status_code==400
     assert c.post('/papers/'+pid+'/approve',headers=h,json={'acknowledge_review':True}).status_code==200
     pub=c.post('/publications',headers=h,json={'conference':'Test Conference','paper_ids':[pid],'confirm_editorial_approval':True})

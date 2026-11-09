@@ -98,3 +98,10 @@ class Dispatch(Base):
     error: Mapped[str]=mapped_column(Text,default='')
     created: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=now)
     sent: Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)
+
+class PublicationDraft(Base):
+    __tablename__='publication_drafts'
+    conference_id: Mapped[str]=mapped_column(ForeignKey('agent_conferences.id'),primary_key=True)
+    signature: Mapped[str]=mapped_column(String,default='')
+    output: Mapped[dict]=mapped_column(JSON,default=dict)
+    updated: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=now)

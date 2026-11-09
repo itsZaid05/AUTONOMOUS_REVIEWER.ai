@@ -1,0 +1,10 @@
+{
+  "public_url": null,
+  "dashboard_internal_health": "HTTP 200",
+  "native_preview_tool_available": false,
+  "cloudflare_control_probe": "Proxy CONNECT HTTP 403 Forbidden",
+  "tcp_tunnel_grants": [],
+  "public_preview_admin_token_prefill": "disabled when PUBLIC_PREVIEW=true; UI harness verified",
+  "required_external_capability": "Platform public port forwarding, or an explicitly permitted tunnel transport",
+  "observed_at": 1794142188.9195004
+}

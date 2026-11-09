@@ -1,0 +1,9 @@
+{
+  "observed_at": 1794168859.9574142,
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "key_available": true,
+  "status": "FAIL",
+  "error_type": "ProxyError",
+  "reason": "Request failed; credentials and provider exception text withheld"
+}
